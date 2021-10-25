@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://e579-223-19-143-35.ngrok.io/'
+    baseURL: 'https://b057-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -31,7 +31,31 @@ var api = {
         }
         
         return post(request)
-    }
+    },
+    changePasswordRequest: (props) => {
+        var request = {
+            method: 'user/changePasswordRequest',
+            params: props
+        }
+
+        return post(request)
+    },
+    passwordVerification: (props) => {
+        var request = {
+            method: 'user/passwordVerification',
+            params: props
+        }
+
+        return post(request)
+    },
+    changePassword: (props) => {
+        var request = {
+            method: 'user/changePassword',
+            params: props
+        }
+
+        return post(request)
+    },
 
 }
 
