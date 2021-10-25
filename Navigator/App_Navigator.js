@@ -12,7 +12,7 @@ function App_Navigator() {
   );
 
   const loginComponent = (navigation) => (
-      <Login navigation={navigation.navigation} />
+      <Login navigation={navigation.navigation} route={navigation.route}/>
   )
 
   return (
