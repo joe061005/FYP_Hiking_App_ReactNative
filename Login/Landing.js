@@ -26,10 +26,10 @@ class Landing extends React.Component{
           <View style={localStyles.Container}>
               <ImageBackground source={require("../assets/landingbg.jpg")} resizeMode="cover" style={localStyles.backgroundImage}>
                   <Image source={require("../assets/LandingLogo.png")} style={localStyles.Logo}/>
-                  <TouchableOpacity onPress = {()=> {this.props.navigation.navigate("login", {type: 1})}} style={localStyles.Button}>
+                  <TouchableOpacity onPress = {()=> {this.props.navigation.replace("login", {type: 1})}} style={localStyles.Button}>
                       <Text>註冊帳號</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress = {()=> {this.props.navigation.navigate("login", {type: 0})}} style={localStyles.Button}>
+                  <TouchableOpacity onPress = {()=> {this.props.navigation.replace("login", {type: 0})}} style={localStyles.Button}>
                       <Text>登入</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress = {()=> {}} style={localStyles.Button}>

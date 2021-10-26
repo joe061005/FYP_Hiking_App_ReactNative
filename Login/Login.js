@@ -12,7 +12,8 @@ import {
   ImageBackground,
   ColorPropType,
   Alert,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  BackHandler
 } from "react-native";
 import SwitchSelector from "react-native-switch-selector";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -20,6 +21,7 @@ import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import NetInfo from '@react-native-community/netinfo'
 import { showMessage } from "react-native-flash-message"
 import API from "../Api/api"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
 class Login extends React.Component {
@@ -27,18 +29,24 @@ class Login extends React.Component {
     super(props);
     this.state = {
       page: "",
+
       user_name: "",
       password: "",
       passwordSecurityEntry: true,
+      validInput: true,
+      approvedInput: true,
+
       register_username: "",
       register_password: "",
       register_confirm_password: "",
       register_email: "",
-      validInput: true,
-      approvedInput: true,
+      register_validInput: true,
+      register_validConfirmPassword: true,
+      register_validEmail: true,
 
       resendEmail_username: "",
       EmailvalidUsername: true,
+
       PasswordvalidUsername: true,
       forgetPassword_username: "",
 
@@ -56,12 +64,14 @@ class Login extends React.Component {
     };
 
     this.login = this.login.bind(this)
-    this.isValidInput = this.isValidInput.bind(this)
+    this.isValidLoginInput = this.isValidLoginInput.bind(this)
     this.resendEmail = this.resendEmail.bind(this)
     this.Message = this.Message.bind(this)
     this.forgetPassword = this.forgetPassword.bind(this)
     this.codeVerification = this.codeVerification.bind(this)
     this.changePassword = this.changePassword.bind(this)
+    this.isValidRegisterInput = this.isValidRegisterInput.bind(this)
+    this.handleBackButton = this.handleBackButton.bind(this)
   }
 
   componentDidMount() {
@@ -86,11 +96,45 @@ class Login extends React.Component {
     } else {
       this.setState({ page: "register" })
     }
+
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton)
+  }
+
+  componentWillUnmount(){
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
+  }
+
+  handleBackButton(){
+    Alert.alert(
+      '溫馨提示',
+      '是否離開本程式',
+      [
+        {
+          text: '取消',
+          onDismiss: () => { },
+        },
+        {
+          text: '確定',
+          onPress: () => BackHandler.exitApp()
+        }
+      ],
+      { cancelable: true }
+    );
+    return true;
+  }
+
+  async isLogin(){
+    if(await API.isLogin()){
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
   async login() {
     console.log("login")
-    if (!this.isValidInput()) return;
+    if (!this.isValidLoginInput()) return;
     this.setState({ validInput: true, approvedInput: true });
 
     var params = {
@@ -98,18 +142,27 @@ class Login extends React.Component {
       password: this.state.password
     }
 
-    API.login(params).then(([code, data]) => {
+    API.login(params).then(([code, data, header]) => {
       if (code == '401') {
         this.setState({ validInput: false })
       } else if (code == '400') {
         this.setState({ approvedInput: false })
       } else {
-
+        console.log("header", header)
+        var set_cookies = ""
+        for(const [name, value] of header){
+          if( name == "set-cookie"){
+            set_cookies = value
+          }
+        }
+        API.setLoginData(data, set_cookies)
+        console.log("set_cookie", set_cookies)
+        this.props.navigation.replace("intro")
       }
     })
   }
 
-  isValidInput() {
+  isValidLoginInput() {
     this.setState({ validInput: this.state.user_name && this.state.password })
     return (this.state.user_name && this.state.password)
   }
@@ -226,6 +279,50 @@ class Login extends React.Component {
         this.setState({ page: "login" })
       }
     })
+  }
+
+  async register() {
+    if (!this.isValidRegisterInput()) return;
+    this.setState({ register_validInput: true, register_validConfirmPassword: true })
+
+    var params = {
+      username: this.state.register_username,
+      password: this.state.register_password,
+      email: this.state.register_email
+    }
+
+    API.register(params).then(([code, data]) => {
+      if(code == '409'){
+        this.Message('此用戶名己存在')
+      }else if (code == '200'){
+        this.Message('成功創立帳戶，請透過電郵啟用您的帳號')
+      }
+    })
+
+  }
+
+  isValidRegisterInput() {
+    console.log("checking: ", this.state.register_username && this.state.register_password && this.state.register_confirm_password && this.state.register_email)
+    if (!(this.state.register_username && this.state.register_password && this.state.register_confirm_password && this.state.register_email)) {
+      this.setState({ register_validInput: false })
+      this.setState({ register_validConfirmPassword: true })
+      this.setState({ register_validEmail: true })
+      return false
+    } else if (!(this.state.register_password == this.state.register_confirm_password)) {
+      this.setState({ register_validConfirmPassword: false })
+      this.setState({ register_validInput: true })
+      this.setState({ register_validEmail: true })
+      return false
+    } else if (this.state.register_email) {
+      let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/
+      if (!emailRegex.test(this.state.register_email)) {
+        this.setState({ register_validEmail: false })
+        this.setState({ register_validConfirmPassword: true })
+        this.setState({ register_validInput: true })
+        return false
+      }
+    }
+    return true
   }
 
 
@@ -412,16 +509,33 @@ class Login extends React.Component {
             autoCorrect={false}
             autoCapitalize='none'
             underlineColorAndroid='transparent'
-            secureTextEntry={this.state.passwordSecurityEntry}
             placeholder='電郵地址'
             onChangeText={(register_email) => this.setState({ register_email: register_email })}
             selectTextOnFocus={true}
           />
         </View>
 
+        {!this.state.register_validInput &&
+          <Text style={localStyles.ErrorField}>
+            請輸入所有資料
+          </Text>
+        }
+
+        {!this.state.register_validConfirmPassword &&
+          <Text style={localStyles.ErrorField}>
+            密碼不相同
+          </Text>
+        }
+
+        {!this.state.register_validEmail&&
+          <Text style={localStyles.ErrorField}>
+            無效的電郵
+          </Text>
+        }
 
 
-        <TouchableOpacity onPress={() => { }}>
+
+        <TouchableOpacity onPress={() => { this.register() }}>
           <View style={localStyles.ButtonContainer}>
             <View style={localStyles.LoginButton}>
               <Text style={localStyles.ButtonText}>註冊</Text>
@@ -549,62 +663,70 @@ class Login extends React.Component {
 
     const change_password = (
       <View style={localStyles.FormInputContainer}>
-         <View style={localStyles.FormInputContainer}>
-        <Text style={localStyles.functionTitleField}>更改密碼</Text>
+        <View style={localStyles.FormInputContainer}>
+          <Text style={localStyles.functionTitleField}>更改密碼</Text>
 
-        <Text style={localStyles.userNameField}>新密碼</Text>
+          <Text style={localStyles.userNameField}>新密碼</Text>
 
-        <View style={localStyles.InputField}>
-          <TextInput
-            style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
-            value={this.state.changedPassword}
-            autoCorrect={false}
-            autoCapitalize='none'
-            underlineColorAndroid='transparent'
-            placeholder='新密碼'
-            onChangeText={(changedPassword) => this.setState({ changedPassword: changedPassword })}
-            selectTextOnFocus={true}
-          />
-        </View>
-
-        <Text style={localStyles.userNameField}>確認新密碼</Text>
-
-        <View style={localStyles.InputField}>
-          <TextInput
-            style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
-            value={this.state.confirmChangedPassword}
-            autoCorrect={false}
-            autoCapitalize='none'
-            underlineColorAndroid='transparent'
-            placeholder='確認新密碼'
-            onChangeText={(confirmChangedPassword) => this.setState({ confirmChangedPassword: confirmChangedPassword })}
-            selectTextOnFocus={true}
-          />
-        </View>
-
-        {!this.state.changedPasswordValid &&
-          <Text style={localStyles.ErrorField}>
-            請檢查密碼是否一致
-          </Text>
-        }
-
-        <TouchableOpacity onPress={() => { this.changePassword() }}>
-          <View style={localStyles.ButtonContainer}>
-            <View style={localStyles.LoginButton}>
-              <Text style={localStyles.ButtonText}>確認更改</Text>
-            </View>
+          <View style={localStyles.InputField}>
+            <TextInput
+              style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
+              value={this.state.changedPassword}
+              autoCorrect={false}
+              autoCapitalize='none'
+              underlineColorAndroid='transparent'
+              placeholder='新密碼'
+              onChangeText={(changedPassword) => this.setState({ changedPassword: changedPassword })}
+              selectTextOnFocus={true}
+            />
           </View>
-        </TouchableOpacity>
-      </View>
+
+          <Text style={localStyles.userNameField}>確認新密碼</Text>
+
+          <View style={localStyles.InputField}>
+            <TextInput
+              style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
+              value={this.state.confirmChangedPassword}
+              autoCorrect={false}
+              autoCapitalize='none'
+              underlineColorAndroid='transparent'
+              placeholder='確認新密碼'
+              onChangeText={(confirmChangedPassword) => this.setState({ confirmChangedPassword: confirmChangedPassword })}
+              selectTextOnFocus={true}
+            />
+          </View>
+
+          {!this.state.changedPasswordValid &&
+            <Text style={localStyles.ErrorField}>
+              請檢查密碼是否一致
+            </Text>
+          }
+
+          <TouchableOpacity onPress={() => { this.changePassword() }}>
+            <View style={localStyles.ButtonContainer}>
+              <View style={localStyles.LoginButton}>
+                <Text style={localStyles.ButtonText}>確認更改</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     )
 
 
     return (
 
-      <KeyboardAvoidingView style = {{flex: 1}} behavior={"padding"} keyboardVerticalOffset={Platform.OS == 'ios' ? 10 : -300}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"} keyboardVerticalOffset={Platform.OS == 'ios' ? 0 : -300}>
+        <ScrollView 
+        // style= {{
+        //   flex: 1
+        // }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'space-between',
+      }}
+        >
 
-        <View style={localStyles.Container}>
           <ImageBackground
             source={require("../assets/loginbg.jpeg")}
             resizeMode="cover"
@@ -647,7 +769,8 @@ class Login extends React.Component {
               </View>
             </View>
           </ImageBackground>
-        </View>
+  
+        </ScrollView>
       </KeyboardAvoidingView>
     );
   }
@@ -659,6 +782,7 @@ const localStyles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
+
   },
   Logo: {
     alignSelf: "center",
@@ -671,14 +795,14 @@ const localStyles = StyleSheet.create({
     alignSelf: "center",
     marginTop: -70,
     borderRadius: 30,
-    borderWidth: 1
+    borderWidth: 1,
   },
   FormContentContainer: {
     width: "70%",
     alignSelf: "center",
   },
   FormInputContainer: {
-    marginTop: 50
+    marginTop: 10
   },
 
   SwitchBar: {

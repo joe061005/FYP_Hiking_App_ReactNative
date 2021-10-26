@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import Landing from "../Login/Landing";
 import Login from "../Login/Login";
+import Intro from "../Login/Intro"
 
 function App_Navigator() {
   const Stack = createStackNavigator();
@@ -13,6 +14,10 @@ function App_Navigator() {
 
   const loginComponent = (navigation) => (
       <Login navigation={navigation.navigation} route={navigation.route}/>
+  )
+
+  const introComponent = (navigation) => (
+    <Intro navigation={navigation.navigation} />
   )
 
   return (
@@ -26,6 +31,11 @@ function App_Navigator() {
         <Stack.Screen
           name="login"
           component={loginComponent}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="intro"
+          component={introComponent}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
