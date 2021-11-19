@@ -21,8 +21,13 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
     "react-native-app-intro-slider": "^4.0.4",
+    "react-native-chart-kit": "^6.11.0",
     "react-native-dropdown-picker": "^5.1.23",
     "react-native-flash-message": "^0.2.0",
+    "react-native-image-slider-box": "^1.1.10",
+    "react-native-maps": "^0.29.4",
+    "react-native-responsive-linechart": "^5.7.1",
+    "react-native-svg": "^12.1.1",
     "react-native-switch-selector": "^2.1.4",
     "react-native-web": "~0.13.12"
   },

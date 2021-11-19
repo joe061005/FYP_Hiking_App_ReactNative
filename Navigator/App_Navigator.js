@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Landing from "../Login/Landing";
 import Login from "../Login/Login";
 import Intro from "../Login/Intro"
+import Tabs from "../Tab/Tabs"
 
 function App_Navigator() {
   const Stack = createStackNavigator();
@@ -18,6 +19,10 @@ function App_Navigator() {
 
   const introComponent = (navigation) => (
     <Intro navigation={navigation.navigation} />
+  )
+
+  const tabComponent = (navigation) => (
+    <Tabs navigation={navigation.navigation} />
   )
 
   return (
@@ -37,6 +42,11 @@ function App_Navigator() {
           name="intro"
           component={introComponent}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name = "tab"
+          component = {tabComponent}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

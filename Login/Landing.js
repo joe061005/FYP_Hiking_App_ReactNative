@@ -32,7 +32,7 @@ class Landing extends React.Component{
                   <TouchableOpacity onPress = {()=> {this.props.navigation.replace("login", {type: 0})}} style={localStyles.Button}>
                       <Text>登入</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress = {()=> {}} style={localStyles.Button}>
+                  <TouchableOpacity onPress = {()=> {this.props.navigation.replace("intro")}} style={localStyles.Button}>
                       <Text>訪客登入</Text>
                   </TouchableOpacity>
               </ImageBackground>

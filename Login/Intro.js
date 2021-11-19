@@ -80,7 +80,7 @@ class Intro extends React.Component {
     };
 
     onDone() {
-       console.log("done")
+       this.props.navigation.replace("tab")
     }
 
     render() {
