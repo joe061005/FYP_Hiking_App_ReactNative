@@ -98,6 +98,8 @@ class Login extends React.Component {
     }
 
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton)
+
+    this.isLogin();
   }
 
   componentWillUnmount(){
@@ -422,7 +424,7 @@ class Login extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { }}>
+        <TouchableOpacity onPress={() => {this.props.navigation.replace("intro") }}>
           <View style={localStyles.ButtonContainer}>
             <View style={localStyles.GuestButton}>
               <Text style={localStyles.ButtonText}>訪客登入</Text>
@@ -543,7 +545,7 @@ class Login extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { }}>
+        <TouchableOpacity onPress={() => { this.props.navigation.replace("intro")}}>
           <View style={localStyles.ButtonContainer}>
             <View style={localStyles.GuestButton}>
               <Text style={localStyles.ButtonText}>訪客登入</Text>

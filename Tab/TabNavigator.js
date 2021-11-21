@@ -21,7 +21,7 @@ const HomeComponent = (navigation) => (
 )
 
 const TrailDetailComponent = (navigation) => (
-    <TrailDetail navigation = {navigation.navigation} />
+    <TrailDetail navigation = {navigation.navigation}  route={navigation.route}/>
 )
 
 const InfoComponent = (navigation) => (

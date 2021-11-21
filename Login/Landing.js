@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     ImageBackground
   } from "react-native";
+import API from "../Api/api"
 
 
 class Landing extends React.Component{
@@ -18,6 +19,18 @@ class Landing extends React.Component{
         super(props);
         this.state={
 
+        }
+        this.isLogin = this.isLogin.bind(this)
+    }
+
+    componentDidMount(){
+        this.isLogin()
+    }
+
+    async isLogin(){
+        if(await API.isLogin()){
+            console.log("LOGIN")
+           this.props.navigation.replace('tab')
         }
     }
 

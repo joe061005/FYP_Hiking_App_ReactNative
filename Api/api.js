@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://2290-223-19-143-35.ngrok.io/'
+    baseURL: 'https://c3d0-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -13,7 +13,7 @@ var storage = {
 }
 
 var api = {
-    // Login.js
+    // Login Page
     login: (props) => {
         var request = {
             method: 'user/login',
@@ -80,7 +80,31 @@ var api = {
         storage.login_data = JSON.parse(login_data)
         storage.cookie = cookie
 
+        console.log("COOKIEBEFORE", cookie)
+
+        if(cookie){
+          const parseCookie = cookie.split(";")
+          .map(v => v.split('='))
+          .reduce((acc,v) => {
+              acc[decodeURIComponent(v[0].trim())] = v[1]? decodeURIComponent(v[1].trim()): ""
+              return acc;
+          }, {});
+
+          console.log("COOKIE Expries", parseCookie.Expires)
+          console.log("isAfter:,", moment().isAfter(parseCookie.Expires))
+
+          return moment().isAfter(parseCookie.Expires)? false: true
+        }
+
         return (login_data)? true : false;
+    },
+
+    // Home page
+    getTrails: () => {
+        var request = {
+            method: 'trail/getTrail'
+        }
+        return get(request);
     }
 
 }
