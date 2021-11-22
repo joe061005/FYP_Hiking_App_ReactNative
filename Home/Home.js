@@ -15,16 +15,6 @@ import {
   Platform
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
-import MapView, { Marker, Polyline } from "react-native-maps";
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph,
-  StackedBarChart
-} from "react-native-chart-kit";
-import { SliderBox } from "react-native-image-slider-box"
 import API from "../Api/api"
 import { FontAwesome } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
@@ -136,10 +126,13 @@ class Home extends React.Component {
               }
             </View>
             <Text style={localStyles.TrailText}>長度：{data.distance}公里 </Text>
-            {data.time.split(".")[0] != '0' ?
-              <Text style={localStyles.TrailText}>時間: {data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
-              :
+            {data.time.split(".")[0] == '0' ?
               <Text style={localStyles.TrailText}>時間： {data.time.split(".")[1]}分鐘</Text>
+              :
+              data.time.split(".")[1] == '0' ?
+                <Text style={localStyles.TrailText}>時間： {data.time.split(".")[0]}小時</Text>
+                :
+                <Text style={localStyles.TrailText}>時間: {data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
             }
             <Text style={localStyles.TrailText}>地區：{data.district} ({data.place}) </Text>
           </View>
@@ -186,6 +179,91 @@ class Home extends React.Component {
               </View>
             }
           </View>
+          <View style={localStyles.discoverContainer}>
+            <Text style={localStyles.discoverText}>探索</Text>
+            <View style={localStyles.discoverItemsContainer}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => { this.props.navigation.navigate("TrailByDistrict", { district: "香港島" })} }>
+                <ImageBackground
+                  source={{ uri: 'https://img.locationscout.net/images/2019-12/the-victoria-peak-hong-kong-island-night-hong-kong_l.jpeg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>香港島</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "九龍及將軍澳" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2017/08/KaiKuen-%E4%B9%9D%E9%BE%8D%E7%81%A3-%E5%B9%B3%E5%B1%B1-6.jpg?resize=696%2C464&ssl=1' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>九龍/將軍澳</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+
+            </View>
+            <View style={localStyles.discoverItemsContainer}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "西貢" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Sai_Kung_Town_Aerial_View_201706.jpg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>西貢</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "大嶼山" })} }>
+                <ImageBackground
+                  source={{ uri: 'https://ak-d.tripcdn.com/images/0101b120008c8z4ox65CA.jpg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>大嶼山</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
+            <View style={localStyles.discoverItemsContainer}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界東北" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://dhtravelertravel.files.wordpress.com/2019/08/dh03a_004.jpg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.5 }}
+                >
+                  <Text style={localStyles.regionText}>新界東北</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界西北" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://res-cms.midland.com.hk/property-news/wp-content/uploads/2020/03/iStock-535224613.jpg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>新界西北</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
+            <View style={localStyles.discoverItemsContainer}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界中部" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2020/08/%E6%96%B0%E7%95%8C%E4%B8%AD%E9%83%A8-%E5%9F%8E%E9%96%80%E8%8D%89%E5%B1%B1-8.jpg?ssl=1' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>新界中部</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "離島" })}}>
+                <ImageBackground
+                  source={{ uri: 'https://cdn2.ettoday.net/images/5840/d5840725.jpg' }}
+                  style={localStyles.imageBG}
+                  imageStyle={{ opacity: 0.6 }}
+                >
+                  <Text style={localStyles.regionText}>離島</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
+          </View>
+
 
 
         </View>
@@ -266,11 +344,12 @@ const localStyles = StyleSheet.create({
   },
   trailContainer: {
 
-    height: 400,
+    height: 410,
     width: 300,
     borderWidth: 1,
     borderRadius: 5,
-    marginRight: 20
+    marginRight: 20,
+    backgroundColor: '#edf6fb',
 
   },
   bgImage: {
@@ -288,6 +367,38 @@ const localStyles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 10
   },
+  discoverContainer: {
+    marginLeft: 30,
+    marginRight: 30,
+    marginTop: 20
+  },
+  discoverText: {
+    fontSize: 30,
+    fontWeight: 'bold'
+  },
+  discoverItemsContainer: {
+    flexDirection: 'row',
+  },
+  discoverItemContainer: {
+    flex: 0.5,
+    borderRadius: 25,
+    borderWidth: 1,
+    height: 100,
+    marginTop: 20,
+    marginRight: 20,
+    overflow: 'hidden' // keep the image in the container
+  },
+  imageBG: {
+    height: '100%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  regionText: {
+    color: 'black',
+    fontSize: 24
+  }
+
 
 
 })

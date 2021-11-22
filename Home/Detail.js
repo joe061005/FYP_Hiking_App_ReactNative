@@ -104,11 +104,14 @@ class Detail extends React.Component {
                 <Ionicons name="time" size={20} color="black" />
                 <Text style={localStyles.InfoText}>時間</Text>
               </View>
-              {data.time.split(".")[0] != '0' ?
-                <Text style={localStyles.InfoText}>{data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
+              {data.time.split(".")[0] == '0' ?
+              <Text style={localStyles.InfoText}>{data.time.split(".")[1]}分鐘</Text>
+              :
+              data.time.split(".")[1] == '0' ?
+                <Text style={localStyles.InfoText}>{data.time.split(".")[0]}小時</Text>
                 :
-                <Text style={localStyles.InfoText}>{data.time.split(".")[1]}分鐘</Text>
-              }
+                <Text style={localStyles.InfoText}>{data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
+            }
             </View>
             <View style={localStyles.InfoItemContainer}>
               <View style={localStyles.InfoTitleContainer}>
@@ -137,6 +140,8 @@ class Detail extends React.Component {
               longitudeDelta: 0.0221
             }}
             style={localStyles.map}
+            showsUserLocation={true}
+            followsUserLocation={true}
           >
             {data.marker.map((marker, index) => (
               <Marker
@@ -314,11 +319,12 @@ const localStyles = StyleSheet.create({
     backgroundColor: '#f1f8ff',
   },
   TableRow: {
-    height: 100
+    height: 150
   },
   TableTitleText: {
     fontWeight: 'bold',
-    fontSize: 20
+    fontSize: 20,
+    textAlign: 'center'
   },
   TableText: {
     textAlign: 'center',
