@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react"
-import { FontAwesome, MaterialIcons, Ionicons, Fontisto } from '@expo/vector-icons'
+import { FontAwesome, MaterialIcons, Ionicons, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons'
 import { StyleSheet, Platform } from "react-native";
 import {
     HomeNavigator,
@@ -61,16 +61,16 @@ class Tabs extends React.Component{
                 }}
               />
               <Tab.Screen
-                 name = "match"
+                 name = "record"
                  component={MatchNavigator}
                  options={{
-                    tabBarLabel: "群組配對",
+                    tabBarLabel: "遠足記錄",
                     tabBarLabelStyle: localStyles.TabLabel,
                     tabBarIcon: ({focused}) =>(
-                        <Fontisto
-                        size={40}
-                        color = "red"
-                        name = "flag"
+                        <MaterialCommunityIcons
+                        size={30}
+                        color = "black"
+                        name = {`flag-variant${focused? '': '-outline'}`}
                         />
                     ),
                 }}

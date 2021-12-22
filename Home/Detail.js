@@ -141,7 +141,6 @@ class Detail extends React.Component {
             }}
             style={localStyles.map}
             showsUserLocation={true}
-            followsUserLocation={true}
           >
             {data.marker.map((marker, index) => (
               <Marker
@@ -238,7 +237,7 @@ class Detail extends React.Component {
         </View>
 
         <View style={localStyles.RefContainer}>
-          <Text style={localStyles.RefText}>資料由FollowMe隨我行提供</Text>
+          <Text style={localStyles.RefText}>資料由FolloMe隨我行提供</Text>
         </View>
 
 
