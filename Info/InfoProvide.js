@@ -285,8 +285,16 @@ class InfoProvide extends React.Component {
       district: this.state.districtValue,
       trail: this.state.trailValue
     }
-
     console.log("PARAM", params)
+
+    API.addInfo(params).then(([code, data, header]) => {
+      if (code == '200') {
+        console.log("InfoData: ", data)
+      }else if (code == '400'){
+        console.log("error")
+      }
+    })
+
     this.setState({ spinner: !this.state.spinner })
     this.props.navigation.goBack();
 

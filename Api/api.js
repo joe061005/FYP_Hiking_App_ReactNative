@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://d03e-223-19-143-35.ngrok.io/'
+    baseURL: 'https://df69-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
