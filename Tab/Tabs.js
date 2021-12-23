@@ -5,7 +5,7 @@ import { StyleSheet, Platform } from "react-native";
 import {
     HomeNavigator,
     InfoNavigator,
-    MatchNavigator,
+    RecordNavigator,
     GroupNavigator,
     SettingNavigator
 } from "./TabNavigator"
@@ -62,7 +62,7 @@ class Tabs extends React.Component{
               />
               <Tab.Screen
                  name = "record"
-                 component={MatchNavigator}
+                 component={RecordNavigator}
                  options={{
                     tabBarLabel: "遠足記錄",
                     tabBarLabelStyle: localStyles.TabLabel,

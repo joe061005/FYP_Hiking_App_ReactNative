@@ -9,11 +9,12 @@ import {
     RefreshControl,
     Image,
     TouchableOpacity,
-    ImageBackground
+    ImageBackground,
+    Alert
   } from "react-native";
 
 
-class Match extends React.Component{
+class Record extends React.Component{
     constructor(props){
         super(props);
         this.state={
@@ -35,4 +36,4 @@ const localStyles = StyleSheet.create({
 
 })
 
-export default Match;
+export default Record;

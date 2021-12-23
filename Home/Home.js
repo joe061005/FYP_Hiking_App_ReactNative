@@ -12,7 +12,8 @@ import {
   ImageBackground,
   BackHandler,
   Dimensions,
-  Platform
+  Platform,
+  Alert
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
@@ -59,7 +60,6 @@ class Home extends React.Component {
   }
 
   handleBackButton = () => {
-    if (this.state.isFocused) {
       Alert.alert(
         '溫馨提示',
         this.state.isLogin ? '是否離開？' : '是否離開？',
@@ -76,7 +76,6 @@ class Home extends React.Component {
         { cancelable: true }
       );
       return true;
-    }
   }
 
 

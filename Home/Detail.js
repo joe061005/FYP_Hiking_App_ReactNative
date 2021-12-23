@@ -12,7 +12,8 @@ import {
   ImageBackground,
   BackHandler,
   Dimensions,
-  Platform
+  Platform,
+  Alert
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import MapView, { Marker, Polyline } from "react-native-maps";

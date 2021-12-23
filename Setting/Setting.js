@@ -9,7 +9,8 @@ import {
     RefreshControl,
     Image,
     TouchableOpacity,
-    ImageBackground
+    ImageBackground,
+    Alert
   } from "react-native";
 
 

@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import Home from "../Home/Home"
 import Info from "../Info/Info"
-import Match from "../Match/Match"
+import Record from "../Record/Record"
 import Group from "../Group/Group"
 import Setting from "../Setting/Setting"
 import TrailDetail from "../Home/Detail"
 import District from "../Home/District"
+import InfoProvide from "../Info/InfoProvide";
 
 //Home page
 
@@ -36,9 +37,13 @@ const InfoComponent = (navigation) => (
     <Info navigation={navigation.navigation} />
 )
 
+const InfoProvideComponent = (navigation) => (
+    <InfoProvide navigation={navigation.navigation} route = {navigation.route} />
+)
+
 // match page
-const MatchComponent = (navigation) => (
-    <Match navigation={navigation.navigation} />
+const RecordComponent = (navigation) => (
+    <Record navigation={navigation.navigation} />
 )
 
 // group page
@@ -96,23 +101,31 @@ const InfoNavigator = ({ navigation, route }) => {
                     title: "遠足資訊"
                 }}
             />
+
+            <InfoStack.Screen
+                name = "InfoProvide"
+                component = {InfoProvideComponent}
+                options = {{
+                    title: "提供資訊"
+                }}
+            />
         </InfoStack.Navigator>
     )
 }
 
-const MatchStack = createStackNavigator();
+const RecordStack = createStackNavigator();
 
-const MatchNavigator = ({ navigation, route }) => {
+const RecordNavigator = ({ navigation, route }) => {
     return (
-        <MatchStack.Navigator initialRouteName="Match">
-            <MatchStack.Screen
-                name="Match"
-                component={MatchComponent}
+        <RecordStack.Navigator initialRouteName="Record">
+            <RecordStack.Screen
+                name="Record"
+                component={RecordComponent}
                 options={{
-                    title: "群組配對"
+                    title: "遠足記錄"
                 }}
             />
-        </MatchStack.Navigator>
+        </RecordStack.Navigator>
     )
 }
 
@@ -151,7 +164,7 @@ const SettingNavigator = ({ navigation, route }) => {
 export {
     HomeNavigator,
     InfoNavigator,
-    MatchNavigator,
+    RecordNavigator,
     GroupNavigator,
     SettingNavigator
 }
