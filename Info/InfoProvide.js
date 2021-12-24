@@ -24,6 +24,7 @@ import * as Location from 'expo-location';
 import { Button } from "react-native-paper"
 import * as ImagePicker from "expo-image-picker"
 import Spinner from 'react-native-loading-spinner-overlay'
+import MapView, { Marker, Polyline } from "react-native-maps";
 
 
 
@@ -60,6 +61,7 @@ class InfoProvide extends React.Component {
         { label: "景點", value: "景點" },
         { label: "交通", value: "交通" },
         { label: "危險告示", value: "危險告示" },
+        { label: "其他", value: "其他" },
       ],
       text: "",
       location: null,
@@ -272,16 +274,15 @@ class InfoProvide extends React.Component {
       )
       return;
     }
-
     this.setState({ spinner: !this.state.spinner })
-    const data = await this.handleUpload();
-    console.log("data", data.url)
+   // const data = await this.handleUpload();
+   // console.log("data", data.url)
 
     var params = {
       type: this.state.typeValue,
       description: this.state.text,
       location: { latitude: parseFloat(this.state.location.coords.latitude), longitude: parseFloat(this.state.location.coords.longitude) },
-      image: data.url,
+     // image: data.url,
       district: this.state.districtValue,
       trail: this.state.trailValue
     }
@@ -290,13 +291,12 @@ class InfoProvide extends React.Component {
     API.addInfo(params).then(([code, data, header]) => {
       if (code == '200') {
         console.log("InfoData: ", data)
-      }else if (code == '400'){
+        Alert.alert('提示', '己提交資訊!', [{ text: '確定', onPress: () => { this.setState({ spinner: !this.state.spinner }); this.props.navigation.goBack() } }])
+      } else if (code == '400') {
         console.log("error")
+        Alert.alert('提示', '未能提交資訊，請稍後再試', [{ text: '確定', onPress: () => { this.setState({ spinner: !this.state.spinner }) } }])
       }
     })
-
-    this.setState({ spinner: !this.state.spinner })
-    this.props.navigation.goBack();
 
   }
 
@@ -431,7 +431,16 @@ class InfoProvide extends React.Component {
               : null
             }
             {this.state.location ?
-              <Text style={[localStyles.formText, { color: 'blue' }]}>己分享位置</Text>
+              <MapView
+                region={{
+                  latitude: this.state.location.coords.latitude,
+                  longitude: this.state.location.coords.longitude,
+                  latitudeDelta: 0.0222,
+                  longitudeDelta: 0.0221
+                }}
+              >
+
+              </MapView>
               :
               <TouchableOpacity onPress={async () => { await this.getLocation() }}>
                 <View style={[localStyles.buttonContainer]}>

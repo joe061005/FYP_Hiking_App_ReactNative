@@ -17,6 +17,7 @@ import Setting from "../Setting/Setting"
 import TrailDetail from "../Home/Detail"
 import District from "../Home/District"
 import InfoProvide from "../Info/InfoProvide";
+import ChangePW from "../Setting/ChangePW"
 
 //Home page
 
@@ -38,7 +39,7 @@ const InfoComponent = (navigation) => (
 )
 
 const InfoProvideComponent = (navigation) => (
-    <InfoProvide navigation={navigation.navigation} route = {navigation.route} />
+    <InfoProvide navigation={navigation.navigation} route={navigation.route} />
 )
 
 // match page
@@ -56,6 +57,10 @@ const SettingComponent = (navigation) => (
     <Setting navigation={navigation.navigation} />
 )
 
+const ChangePWComponent = (navigation) => (
+    <ChangePW navigation = {navigation.navigation} route={navigation.route} />
+)
+
 const HomeStack = createStackNavigator();
 
 const HomeNavigator = ({ navigation, route }) => {
@@ -65,7 +70,11 @@ const HomeNavigator = ({ navigation, route }) => {
                 name="Home"
                 component={HomeComponent}
                 options={{
-                    title: "主頁"
+                    title: "主頁",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+
                 }}
             />
 
@@ -73,7 +82,10 @@ const HomeNavigator = ({ navigation, route }) => {
                 name="TrailDetail"
                 component={TrailDetailComponent}
                 options={({ route }) => ({
-                    title: route.params.title
+                    title: route.params.title,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 })}
             />
 
@@ -81,7 +93,10 @@ const HomeNavigator = ({ navigation, route }) => {
                 name="TrailByDistrict"
                 component={TrailDistrictComponent}
                 options={({ route }) => ({
-                   title: route.params.district
+                    title: route.params.district,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 })}
 
             />
@@ -98,15 +113,21 @@ const InfoNavigator = ({ navigation, route }) => {
                 name="Info"
                 component={InfoComponent}
                 options={{
-                    title: "遠足資訊"
+                    title: "遠足資訊",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 }}
             />
 
             <InfoStack.Screen
-                name = "InfoProvide"
-                component = {InfoProvideComponent}
-                options = {{
-                    title: "提供資訊"
+                name="InfoProvide"
+                component={InfoProvideComponent}
+                options={{
+                    title: "提供資訊",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 }}
             />
         </InfoStack.Navigator>
@@ -122,7 +143,10 @@ const RecordNavigator = ({ navigation, route }) => {
                 name="Record"
                 component={RecordComponent}
                 options={{
-                    title: "遠足記錄"
+                    title: "遠足記錄",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 }}
             />
         </RecordStack.Navigator>
@@ -138,7 +162,10 @@ const GroupNavigator = ({ navigation, route }) => {
                 name="Group"
                 component={GroupComponent}
                 options={{
-                    title: "遠足群組"
+                    title: "遠足群組",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 }}
             />
         </GroupStack.Navigator>
@@ -154,9 +181,23 @@ const SettingNavigator = ({ navigation, route }) => {
                 name="Setting"
                 component={SettingComponent}
                 options={{
-                    title: "設定"
+                    title: "設定",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
                 }}
             />
+            <SettingStack.Screen
+                name="ChangePW"
+                component={ChangePWComponent}
+                options={{
+                    title: "更改密碼",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
+            />
+            
         </SettingStack.Navigator>
     )
 }

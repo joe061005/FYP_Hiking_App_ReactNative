@@ -33,7 +33,8 @@ class Info extends React.Component {
     }
     this.getTabStyle = this.getTabStyle.bind(this)
     this.handleBackButton = this.handleBackButton.bind(this)
-    this.getTrailInfo = this.getTrailInfo.bind(this)
+    this.getInfo = this.getInfo.bind(this)
+    this._onRefresh = this._onRefresh.bind(this)
   }
   componentDidMount() {
     NetInfo.fetch().then(state => {
@@ -50,7 +51,7 @@ class Info extends React.Component {
     });
 
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-    this.getTrailInfo();
+    this.getInfo();
 
 
   }
@@ -80,7 +81,7 @@ class Info extends React.Component {
     }
   }
 
-  getTrailInfo() {
+  getInfo() {
     API.getTrailInfo().then(([code, data, header]) => {
       if (code == '200') {
         this.setState({ trailInfo: data })
@@ -101,12 +102,15 @@ class Info extends React.Component {
   }
 
   _onRefresh() {
-    this.getTrailInfo()
+    this.getInfo()
+  }
+
+  async isLogin(){
+    
   }
 
 
   render() {
-    console.log(this.state.trailInfo)
     return this.state.dataFetched ? (
       <ScrollView style={localStyles.Container} refreshControl={
         <RefreshControl

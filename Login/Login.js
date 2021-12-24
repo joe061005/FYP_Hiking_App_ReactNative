@@ -53,7 +53,7 @@ class Login extends React.Component {
       verificationCode: "",
       codevalid: true,
 
-      passwordUsername: "",
+      //passwordUsername: "",
 
       changedPassword: "",
       confirmChangedPassword: "",
@@ -102,11 +102,11 @@ class Login extends React.Component {
     this.isLogin();
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
   }
 
-  handleBackButton(){
+  handleBackButton() {
     Alert.alert(
       '溫馨提示',
       '是否離開本程式',
@@ -125,11 +125,11 @@ class Login extends React.Component {
     return true;
   }
 
-  async isLogin(){
-    if(await API.isLogin()){
+  async isLogin() {
+    if (await API.isLogin()) {
       return true;
     }
-    else{
+    else {
       return false;
     }
   }
@@ -152,8 +152,8 @@ class Login extends React.Component {
       } else {
         console.log("header", header)
         var set_cookies = ""
-        for(const [name, value] of header){
-          if( name == "set-cookie"){
+        for (const [name, value] of header) {
+          if (name == "set-cookie") {
             set_cookies = value
           }
         }
@@ -220,7 +220,7 @@ class Login extends React.Component {
       } else if (code == '400') {
         this.Message('請先完成驗證')
       } else {
-        this.setState({ forgetPassword_username: "" })
+        //  this.setState({ forgetPassword_username: "" })
         this.Message('己發出電郵')
         this.setState({ page: "enterCode" })
       }
@@ -246,9 +246,12 @@ class Login extends React.Component {
         this.Message('驗證碼己過期')
       } else {
         console.log("DATA :", data)
-        this.setState({ passwordUsername: data })
-        this.Message('驗證成功')
-        this.setState({ page: "changePassword" })
+        if (data != this.state.forgetPassword_username) {
+          this.setState({ codevalid: false })
+        } else {
+          this.Message('驗證成功')
+          this.setState({ page: "changePassword" })
+        }
       }
 
 
@@ -264,7 +267,6 @@ class Login extends React.Component {
 
     var params = {
       code: this.state.verificationCode,
-      username: this.state.passwordUsername,
       password: this.state.changedPassword
     }
 
@@ -276,7 +278,7 @@ class Login extends React.Component {
       } else {
         this.Message('成功更改密碼')
         this.setState({ verificationCode: "" })
-        this.setState({ passwordUsername: "" })
+        this.setState({ forgetPassword_username: "" })
         this.setState({ changedPassword: "" })
         this.setState({ page: "login" })
       }
@@ -294,10 +296,14 @@ class Login extends React.Component {
     }
 
     API.register(params).then(([code, data]) => {
-      if(code == '409'){
-        this.Message('此用戶名己存在')
-      }else if (code == '200'){
+      if (code == '409') {
+        this.Message('用戶名或電郵己存在')
+      } else if (code == '200') {
         this.Message('成功創立帳戶，請透過電郵啟用您的帳號')
+        this.setState({register_username: ''})
+        this.setState({register_password: ''})
+        this.setState({register_email: ''})
+        this.setState({register_confirm_password: ''})
       }
     })
 
@@ -424,13 +430,13 @@ class Login extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => {this.props.navigation.replace("intro") }}>
+        {/* <TouchableOpacity onPress={() => { this.props.navigation.replace("intro") }}>
           <View style={localStyles.ButtonContainer}>
             <View style={localStyles.GuestButton}>
               <Text style={localStyles.ButtonText}>訪客登入</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
       </View>
 
@@ -529,7 +535,7 @@ class Login extends React.Component {
           </Text>
         }
 
-        {!this.state.register_validEmail&&
+        {!this.state.register_validEmail &&
           <Text style={localStyles.ErrorField}>
             無效的電郵
           </Text>
@@ -545,13 +551,13 @@ class Login extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { this.props.navigation.replace("intro")}}>
+        {/* <TouchableOpacity onPress={() => { this.props.navigation.replace("intro") }}>
           <View style={localStyles.ButtonContainer}>
             <View style={localStyles.GuestButton}>
               <Text style={localStyles.ButtonText}>訪客登入</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
       </View>
     )
@@ -719,14 +725,14 @@ class Login extends React.Component {
     return (
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"} keyboardVerticalOffset={Platform.OS == 'ios' ? 0 : -300}>
-        <ScrollView 
-        // style= {{
-        //   flex: 1
-        // }}
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: 'space-between',
-      }}
+        <ScrollView
+          // style= {{
+          //   flex: 1
+          // }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'space-between',
+          }}
         >
 
           <ImageBackground
@@ -771,7 +777,7 @@ class Login extends React.Component {
               </View>
             </View>
           </ImageBackground>
-  
+
         </ScrollView>
       </KeyboardAvoidingView>
     );

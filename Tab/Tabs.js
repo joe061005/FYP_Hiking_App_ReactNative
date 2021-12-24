@@ -25,7 +25,9 @@ class Tabs extends React.Component{
           screenOptions={{
             tabBarStyle:
               {
-                  height: (Platform.OS === 'ios')? 100: 70
+                  height: (Platform.OS === 'ios')? 100: 70,
+                  backgroundColor: "#E0FFF6"
+
               },
               headerShown: false
           }}
@@ -35,7 +37,7 @@ class Tabs extends React.Component{
                  component={HomeNavigator}
                  options={{
                      tabBarLabel: "主頁",
-                     tabBarLabelStyle: localStyles.TabLabel,
+                     tabBarLabelStyle:  localStyles.TabLabel,
                      tabBarIcon: ({focused}) =>(
                          <Ionicons
                          size={30}
@@ -114,6 +116,14 @@ class Tabs extends React.Component{
 const localStyles = StyleSheet.create({
     TabLabel: {
        fontSize: 15
+    },
+    TabBarTextFocusedStyle: {
+        color: "rgba(242,231,254,255)",
+        fontSize: 15
+    },
+    TabBarTextNonFocusedStyle: {
+        color: "rgba(185,138,249,255) ",
+        fontSize: 15
     }
 })
 

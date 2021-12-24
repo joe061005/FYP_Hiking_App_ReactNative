@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://df69-223-19-143-35.ngrok.io/'
+    baseURL: 'https://4ac5-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -79,8 +79,9 @@ var api = {
 
         storage.login_data = JSON.parse(login_data)
         storage.cookie = cookie
-
+       
         console.log("COOKIEBEFORE", cookie)
+        console.log("isLogin storage:", storage.cookie)
 
         if(cookie){
           const parseCookie = cookie.split(";")
@@ -93,10 +94,15 @@ var api = {
           console.log("COOKIE Expries", parseCookie.Expires)
           console.log("isAfter:,", moment().isAfter(parseCookie.Expires))
 
-          return moment().isAfter(parseCookie.Expires)? false: true
+          if(moment().isAfter(parseCookie.Expires)){
+            await AsyncStorage.removeItem('LOGIN_DATA')
+            await AsyncStorage.removeItem('COOKIE')
+            return false;
+          }
+
         }
 
-        return (login_data)? true : false;
+        return (cookie)? true : false;
     },
 
     // Home page
@@ -128,6 +134,40 @@ var api = {
     addInfo: (props) => {
         var request = {
             method: 'info/addInfo',
+            params: props,
+        }
+
+        return userPost(request)
+    },
+
+    // setting page
+    logout: () => {
+        var request={
+            method: 'user/logout'
+        }
+
+        return post(request)
+    },
+
+    userInfo: () => {
+        return storage.login_data;
+    },
+
+    resetUserData: async() => {
+        storage.login_data = null;
+        storage.cookie = null;
+
+        try{
+            await AsyncStorage.removeItem('LOGIN_DATA')
+            await AsyncStorage.removeItem('COOKIE')
+        }catch(error){
+            console.log("error", error)
+        }
+    },
+
+    changeCurrentPassword: (props) => {
+        var request = {
+            method: 'user/changeCurrentPassword',
             params: props
         }
 
@@ -153,6 +193,26 @@ async function post(request){
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+            request.params
+        )
+    }).then(response => {
+        const statusCode = response.status;
+        const data = response.json();
+        const header = response.headers;
+        return Promise.all([statusCode, data, header]);
+    })
+}
+
+async function userPost(request){
+    console.log("STORAGE.COOKIE", storage.cookie)
+    return fetch(api_path.baseURL + request.method, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cookie': storage.cookie
         },
         body: JSON.stringify(
             request.params
