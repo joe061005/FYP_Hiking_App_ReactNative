@@ -200,7 +200,7 @@ class Info extends React.Component {
   render() {
 
     const recentInfo = this.state.info.map((data, index) => (
-      <TouchableOpacity key={index} onPress={() => { }}>
+      <TouchableOpacity key={index} onPress={() => { this.props.navigation.navigate("InfoDetail", {data: data}) }}>
         <View style={[localStyles.infoItemContainer]}>
           <Image style={localStyles.bgImage} source={{ uri: data.image }} resizeMode="cover" />
           <View style={localStyles.TextContainer}>
