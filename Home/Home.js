@@ -92,7 +92,7 @@ class Home extends React.Component {
   }
 
   // for getting the lastest tail info
-  getTrails() {
+  async getTrails() {
     API.getTrails().then(([code, data, header]) => {
       if (code == '200') {
         //console.log(data)
@@ -108,8 +108,8 @@ class Home extends React.Component {
 
   render() {
     // loop through the hiking trail data
-    const hikingTrailData = this.state.trails.map((data, index1) =>
-      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("TrailDetail", { data: data, title: data.title })}>
+    const hikingTrailData = this.state.trails.slice(0,5).map((data, index1) =>
+      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
         <View style={localStyles.trailContainer}>
           <Image style={localStyles.bgImage} source={{ uri: data.image[0] }} />
           <View style={localStyles.TextContainer}>
@@ -181,7 +181,7 @@ class Home extends React.Component {
           <View style={localStyles.discoverContainer}>
             <Text style={localStyles.discoverText}>探索</Text>
             <View style={localStyles.discoverItemsContainer}>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => { this.props.navigation.navigate("TrailByDistrict", { district: "香港島", image: 'https://img.locationscout.net/images/2019-12/the-victoria-peak-hong-kong-island-night-hong-kong_l.jpeg' })} }>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => { this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "香港島"), image: 'https://img.locationscout.net/images/2019-12/the-victoria-peak-hong-kong-island-night-hong-kong_l.jpeg' })} }>
                 <ImageBackground
                   source={{ uri: 'https://img.locationscout.net/images/2019-12/the-victoria-peak-hong-kong-island-night-hong-kong_l.jpeg' }}
                   style={localStyles.imageBG}
@@ -190,7 +190,7 @@ class Home extends React.Component {
                   <Text style={localStyles.regionText}>香港島</Text>
                 </ImageBackground>
               </TouchableOpacity>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "九龍及將軍澳", image: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2017/08/KaiKuen-%E4%B9%9D%E9%BE%8D%E7%81%A3-%E5%B9%B3%E5%B1%B1-6.jpg?resize=696%2C464&ssl=1' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "九龍及將軍澳"), image: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2017/08/KaiKuen-%E4%B9%9D%E9%BE%8D%E7%81%A3-%E5%B9%B3%E5%B1%B1-6.jpg?resize=696%2C464&ssl=1' })}}>
                 <ImageBackground
                   source={{ uri: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2017/08/KaiKuen-%E4%B9%9D%E9%BE%8D%E7%81%A3-%E5%B9%B3%E5%B1%B1-6.jpg?resize=696%2C464&ssl=1' }}
                   style={localStyles.imageBG}
@@ -202,7 +202,7 @@ class Home extends React.Component {
 
             </View>
             <View style={localStyles.discoverItemsContainer}>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "西貢", image: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Sai_Kung_Town_Aerial_View_201706.jpg' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "西貢"), image: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Sai_Kung_Town_Aerial_View_201706.jpg' })}}>
                 <ImageBackground
                   source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Sai_Kung_Town_Aerial_View_201706.jpg' }}
                   style={localStyles.imageBG}
@@ -211,7 +211,7 @@ class Home extends React.Component {
                   <Text style={localStyles.regionText}>西貢</Text>
                 </ImageBackground>
               </TouchableOpacity>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "大嶼山", image:  'https://ak-d.tripcdn.com/images/0101b120008c8z4ox65CA.jpg'})} }>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "大嶼山"), image:  'https://ak-d.tripcdn.com/images/0101b120008c8z4ox65CA.jpg'})} }>
                 <ImageBackground
                   source={{ uri: 'https://ak-d.tripcdn.com/images/0101b120008c8z4ox65CA.jpg' }}
                   style={localStyles.imageBG}
@@ -222,7 +222,7 @@ class Home extends React.Component {
               </TouchableOpacity>
             </View>
             <View style={localStyles.discoverItemsContainer}>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界東北", image: 'https://dhtravelertravel.files.wordpress.com/2019/08/dh03a_004.jpg' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "新界東北"), image: 'https://dhtravelertravel.files.wordpress.com/2019/08/dh03a_004.jpg' })}}>
                 <ImageBackground
                   source={{ uri: 'https://dhtravelertravel.files.wordpress.com/2019/08/dh03a_004.jpg' }}
                   style={localStyles.imageBG}
@@ -231,7 +231,7 @@ class Home extends React.Component {
                   <Text style={localStyles.regionText}>新界東北</Text>
                 </ImageBackground>
               </TouchableOpacity>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界西北", image: 'https://res-cms.midland.com.hk/property-news/wp-content/uploads/2020/03/iStock-535224613.jpg' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "新界西北"), image: 'https://res-cms.midland.com.hk/property-news/wp-content/uploads/2020/03/iStock-535224613.jpg' })}}>
                 <ImageBackground
                   source={{ uri: 'https://res-cms.midland.com.hk/property-news/wp-content/uploads/2020/03/iStock-535224613.jpg' }}
                   style={localStyles.imageBG}
@@ -242,7 +242,7 @@ class Home extends React.Component {
               </TouchableOpacity>
             </View>
             <View style={localStyles.discoverItemsContainer}>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "新界中部", image: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2020/08/%E6%96%B0%E7%95%8C%E4%B8%AD%E9%83%A8-%E5%9F%8E%E9%96%80%E8%8D%89%E5%B1%B1-8.jpg?ssl=1' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "新界中部"), image: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2020/08/%E6%96%B0%E7%95%8C%E4%B8%AD%E9%83%A8-%E5%9F%8E%E9%96%80%E8%8D%89%E5%B1%B1-8.jpg?ssl=1' })}}>
                 <ImageBackground
                   source={{ uri: 'https://i1.wp.com/fitz.hk/wp-content/uploads/2020/08/%E6%96%B0%E7%95%8C%E4%B8%AD%E9%83%A8-%E5%9F%8E%E9%96%80%E8%8D%89%E5%B1%B1-8.jpg?ssl=1' }}
                   style={localStyles.imageBG}
@@ -251,7 +251,7 @@ class Home extends React.Component {
                   <Text style={localStyles.regionText}>新界中部</Text>
                 </ImageBackground>
               </TouchableOpacity>
-              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { district: "離島", image: 'https://cdn2.ettoday.net/images/5840/d5840725.jpg' })}}>
+              <TouchableOpacity style={localStyles.discoverItemContainer} onPress={() => {this.props.navigation.navigate("TrailByDistrict", { data: this.state.trails.filter((data) => data.district == "離島"), image: 'https://cdn2.ettoday.net/images/5840/d5840725.jpg' })}}>
                 <ImageBackground
                   source={{ uri: 'https://cdn2.ettoday.net/images/5840/d5840725.jpg' }}
                   style={localStyles.imageBG}

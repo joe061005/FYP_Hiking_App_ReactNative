@@ -25,13 +25,13 @@ class District extends React.Component {
     super(props);
     this.state = {
       trails: [],
-      refreshing: false,
-      dataFetched: false,
+      //refreshing: false,
+      //dataFetched: false,
       searchText: ''
     }
     this.handleBackButton = this.handleBackButton.bind(this)
-    this.getTrails = this.getTrails.bind(this)
-    this._onRefresh = this._onRefresh.bind(this)
+    //this.getTrails = this.getTrails.bind(this)
+   // this._onRefresh = this._onRefresh.bind(this)
   }
 
   componentDidMount() {
@@ -49,7 +49,7 @@ class District extends React.Component {
     });
 
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-    this.getTrails()
+    //this.getTrails()
 
   }
 
@@ -78,23 +78,22 @@ class District extends React.Component {
     }
   }
 
-  // for getting the lastest tail info
-  getTrails() {
-    API.getTrailsByDistrict(this.props.route.params.district).then(([code, data, header]) => {
-      if (code == '200') {
-        console.log(data.length)
-        this.setState({ trails: data })
-        this.setState({ dataFetched: true })
-      }
-    })
-  }
+
+  // async getTrails() {
+  //   API.getTrailsByDistrict(this.props.route.params.district).then(([code, data, header]) => {
+  //     if (code == '200') {
+  //       console.log(data.length)
+  //       this.setState({ trails: data })
+  //       this.setState({ dataFetched: true })
+  //     }
+  //   })
+  // }
 
   _onRefresh() {
     this.getTrails();
   }
 
   render() {
-
     const emptyTrail = (
       <View style={[localStyles.emptyTextContainer]}>
         <View style={[localStyles.emptyContent]}>
@@ -106,7 +105,7 @@ class District extends React.Component {
       </View>
     )
 
-    let trailSearch = this.state.trails.filter(
+    let trailSearch = this.props.route.params.data.filter(
       (data) => {
         return (
           (
@@ -118,7 +117,7 @@ class District extends React.Component {
     )
     // loop through the hiking trail data
     const hikingTrailData = trailSearch.map((data, index1) =>
-      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("TrailDetail", { data: data, title: data.title })}>
+      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
         <View style={[localStyles.trailItemContainer, index1 == trailSearch.length - 1 ? { marginBottom: 100 } : {}]}>
           <Image style={localStyles.bgImage} source={{ uri: data.image[0] }} />
           <View style={localStyles.TextContainer}>
@@ -148,7 +147,7 @@ class District extends React.Component {
       </TouchableOpacity>
     )
 
-    return this.state.dataFetched ? (
+    return (
       <View style={localStyles.Container}>
         <Image source={{ uri: this.props.route.params.image }} style={localStyles.backgroundImage} />
         <ScrollView style={localStyles.trailContainer}>
@@ -181,12 +180,12 @@ class District extends React.Component {
 
       </View>
     )
-      :
-      (
-        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Progress.Circle size={60} indeterminate={true} style={{ color: "blue" }} />
-        </View>
-      )
+      // :
+      // (
+      //   <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+      //     <Progress.Circle size={60} indeterminate={true} style={{ color: "blue" }} />
+      //   </View>
+      // )
   }
 }
 

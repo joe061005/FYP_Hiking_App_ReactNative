@@ -275,14 +275,14 @@ class InfoProvide extends React.Component {
       return;
     }
     this.setState({ spinner: !this.state.spinner })
-   // const data = await this.handleUpload();
-   // console.log("data", data.url)
+    const data = await this.handleUpload();
+    console.log("data", data.url)
 
     var params = {
       type: this.state.typeValue,
       description: this.state.text,
       location: { latitude: parseFloat(this.state.location.coords.latitude), longitude: parseFloat(this.state.location.coords.longitude) },
-     // image: data.url,
+      image: data.url,
       district: this.state.districtValue,
       trail: this.state.trailValue
     }
@@ -291,10 +291,16 @@ class InfoProvide extends React.Component {
     API.addInfo(params).then(([code, data, header]) => {
       if (code == '200') {
         console.log("InfoData: ", data)
-        Alert.alert('提示', '己提交資訊!', [{ text: '確定', onPress: () => { this.setState({ spinner: !this.state.spinner }); this.props.navigation.goBack() } }])
+        this.setState({ spinner: !this.state.spinner })
+        setTimeout(() => {
+          Alert.alert('提示', '己提交資訊!', [{ text: '確定', onPress: () => {this.props.navigation.goBack()} }])
+        }, 200)  
       } else if (code == '400') {
         console.log("error")
-        Alert.alert('提示', '未能提交資訊，請稍後再試', [{ text: '確定', onPress: () => { this.setState({ spinner: !this.state.spinner }) } }])
+        this.setState({ spinner: !this.state.spinner })
+        setTimeout(() => {
+          Alert.alert('提示', '未能提交資訊，請稍後再試', [{ text: '確定' }])
+        }, 200)  
       }
     })
 
@@ -438,8 +444,13 @@ class InfoProvide extends React.Component {
                   latitudeDelta: 0.0222,
                   longitudeDelta: 0.0221
                 }}
+                style={{ height: 300 , marginLeft:20, marginTop: 10}}
+                showsUserLocation={true}
               >
-
+                <Marker
+                  coordinate={{ latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude }}
+                  title={'現時的位置'}
+                />
               </MapView>
               :
               <TouchableOpacity onPress={async () => { await this.getLocation() }}>

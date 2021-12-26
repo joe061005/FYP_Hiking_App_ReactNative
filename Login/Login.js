@@ -22,12 +22,15 @@ import NetInfo from '@react-native-community/netinfo'
 import { showMessage } from "react-native-flash-message"
 import API from "../Api/api"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import Spinner from "react-native-loading-spinner-overlay";
 
 
 class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loginSpinner: false,
+      registerSpinner: false,
       page: "",
 
       user_name: "",
@@ -144,11 +147,15 @@ class Login extends React.Component {
       password: this.state.password
     }
 
+    this.setState({loginSpinner: !this.state.loginSpinner})
+
     API.login(params).then(([code, data, header]) => {
       if (code == '401') {
         this.setState({ validInput: false })
+        this.setState({loginSpinner: !this.state.loginSpinner})
       } else if (code == '400') {
         this.setState({ approvedInput: false })
+        this.setState({loginSpinner: !this.state.loginSpinner})
       } else {
         console.log("header", header)
         var set_cookies = ""
@@ -162,6 +169,7 @@ class Login extends React.Component {
         this.props.navigation.replace("intro")
       }
     })
+   
   }
 
   isValidLoginInput() {
@@ -295,17 +303,27 @@ class Login extends React.Component {
       email: this.state.register_email
     }
 
+    this.setState({registerSpinner: !this.state.registerSpinner})
+
     API.register(params).then(([code, data]) => {
       if (code == '409') {
-        this.Message('用戶名或電郵己存在')
+        this.setState({registerSpinner: !this.state.registerSpinner})
+        setTimeout(() => {
+          this.Message('用戶名或電郵己存在')
+        }, 200)  
+        
       } else if (code == '200') {
-        this.Message('成功創立帳戶，請透過電郵啟用您的帳號')
+        this.setState({registerSpinner: !this.state.registerSpinner})
+        setTimeout(() => {
+          this.Message('成功創立帳戶，請透過電郵啟用您的帳號')
+        }, 200)  
         this.setState({register_username: ''})
         this.setState({register_password: ''})
         this.setState({register_email: ''})
         this.setState({register_confirm_password: ''})
       }
     })
+
 
   }
 
@@ -338,6 +356,11 @@ class Login extends React.Component {
 
     const member_login = (
       <View style={localStyles.FormInputContainer}>
+        <Spinner
+          visible={this.state.loginSpinner}
+          textContent={'正在登入...'}
+          textStyle={{ color: 'white' }}
+        />
         <View style={localStyles.InputField}>
           <FontAwesome name="user-circle" size={25} color="#D3D3D3"
             style={{
@@ -445,6 +468,11 @@ class Login extends React.Component {
 
     const member_register = (
       <View style={localStyles.FormInputContainer}>
+        <Spinner
+          visible={this.state.registerSpinner}
+          textContent={'正在註冊...'}
+          textStyle={{ color: 'white' }}
+        />
         <View style={localStyles.InputField}>
           <FontAwesome name="user-circle" size={25} color="#D3D3D3"
             style={{

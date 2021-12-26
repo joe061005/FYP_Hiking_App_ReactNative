@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://4ac5-223-19-143-35.ngrok.io/'
+    baseURL: 'https://3d2c-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -10,6 +10,7 @@ let date = moment().format('YYYY-MM-DD');
 var storage = {
     login_data: {},
     cookie: "",
+    cookie_ID: ""
 }
 
 var api = {
@@ -35,7 +36,7 @@ var api = {
             method: 'user/resendEmail',
             params: props
         }
-        
+
         return post(request)
     },
     changePasswordRequest: (props) => {
@@ -66,43 +67,45 @@ var api = {
         storage.login_data = login_data
         storage.cookie = cookie
 
-        try{
-           await AsyncStorage.setItem('LOGIN_DATA', JSON.stringify(login_data))
-           await AsyncStorage.setItem('COOKIE',cookie)
-        }catch (err){
+        try {
+            await AsyncStorage.setItem('LOGIN_DATA', JSON.stringify(login_data))
+            await AsyncStorage.setItem('COOKIE', cookie)
+        } catch (err) {
             console.log("login data error: ", err)
         }
     },
-    isLogin: async() => {
+    isLogin: async () => {
         let login_data = await AsyncStorage.getItem('LOGIN_DATA');
         let cookie = await AsyncStorage.getItem('COOKIE')
 
         storage.login_data = JSON.parse(login_data)
         storage.cookie = cookie
-       
+
         console.log("COOKIEBEFORE", cookie)
         console.log("isLogin storage:", storage.cookie)
 
-        if(cookie){
-          const parseCookie = cookie.split(";")
-          .map(v => v.split('='))
-          .reduce((acc,v) => {
-              acc[decodeURIComponent(v[0].trim())] = v[1]? decodeURIComponent(v[1].trim()): ""
-              return acc;
-          }, {});
+        if (cookie) {
+            const parseCookie = cookie.split(";")
+                .map(v => v.split('='))
+                .reduce((acc, v) => {
+                    acc[decodeURIComponent(v[0].trim())] = v[1] ? decodeURIComponent(v[1].trim()) : ""
+                    return acc;
+                }, {});
 
-          console.log("COOKIE Expries", parseCookie.Expires)
-          console.log("isAfter:,", moment().isAfter(parseCookie.Expires))
+            console.log("parse Cookie: ", parseCookie)
+            console.log("COOKIE Expries", parseCookie.Expires)
+            console.log("isAfter:,", moment().isAfter(parseCookie.Expires))
 
-          if(moment().isAfter(parseCookie.Expires)){
-            await AsyncStorage.removeItem('LOGIN_DATA')
-            await AsyncStorage.removeItem('COOKIE')
-            return false;
-          }
+            if (moment().isAfter(parseCookie.Expires)) {
+                await api.logout()
+                await AsyncStorage.removeItem('LOGIN_DATA')
+                await AsyncStorage.removeItem('COOKIE')
+                return false;
+            }
 
         }
 
-        return (cookie)? true : false;
+        return (cookie) ? true : false;
     },
 
     // Home page
@@ -117,6 +120,13 @@ var api = {
     getTrailsByDistrict: (district) => {
         var request = {
             method: `trail/getTrailByDistrict/${district}`,
+        }
+        return get(request)
+    },
+
+    getTrailByTitle: (title) => {
+        var request = {
+            method: `trail/getTrailByTitle/${title}`,
         }
         return get(request)
     },
@@ -137,12 +147,28 @@ var api = {
             params: props,
         }
 
-        return userPost(request)
+        return post(request)
+    },
+
+    getInfo: () => {
+        var request = {
+            method: 'info/getInfo'
+        }
+
+        return get(request)
+    },
+
+    getUserInfo: () => {
+        var request = {
+            method: 'user/getInfo'
+        }
+
+        return get(request)
     },
 
     // setting page
-    logout: () => {
-        var request={
+    logout: async () => {
+        var request = {
             method: 'user/logout'
         }
 
@@ -153,14 +179,14 @@ var api = {
         return storage.login_data;
     },
 
-    resetUserData: async() => {
+    resetUserData: async () => {
         storage.login_data = null;
         storage.cookie = null;
 
-        try{
+        try {
             await AsyncStorage.removeItem('LOGIN_DATA')
             await AsyncStorage.removeItem('COOKIE')
-        }catch(error){
+        } catch (error) {
             console.log("error", error)
         }
     },
@@ -176,7 +202,7 @@ var api = {
 
 }
 
-async function get(request){
+async function get(request) {
     return fetch(api_path.baseURL + request.method, {
         method: 'GET'
     }).then(response => {
@@ -187,7 +213,7 @@ async function get(request){
     })
 }
 
-async function post(request){
+async function post(request) {
     return fetch(api_path.baseURL + request.method, {
         method: 'POST',
         headers: {
@@ -205,27 +231,7 @@ async function post(request){
     })
 }
 
-async function userPost(request){
-    console.log("STORAGE.COOKIE", storage.cookie)
-    return fetch(api_path.baseURL + request.method, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Cookie': storage.cookie
-        },
-        body: JSON.stringify(
-            request.params
-        )
-    }).then(response => {
-        const statusCode = response.status;
-        const data = response.json();
-        const header = response.headers;
-        return Promise.all([statusCode, data, header]);
-    })
-}
-
-async function put(request){
+async function put(request) {
     return fetch(api_path.baseURL + request.method, {
         method: 'PUT',
         headers: {

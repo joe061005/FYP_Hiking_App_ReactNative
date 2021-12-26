@@ -18,6 +18,8 @@ import TrailDetail from "../Home/Detail"
 import District from "../Home/District"
 import InfoProvide from "../Info/InfoProvide";
 import ChangePW from "../Setting/ChangePW"
+import DetailByDistrict from "../Home/DetailByDistrict";
+import InfoDetail from "../Info/InfoDetail";
 
 //Home page
 
@@ -33,6 +35,10 @@ const TrailDistrictComponent = (navigation) => (
     <District navigation={navigation.navigation} route={navigation.route} />
 )
 
+const DetailByDistrictComponent = (navigation) => (
+    <DetailByDistrict navigation={navigation.navigation} route={navigation.route} />
+)
+
 // Info page
 const InfoComponent = (navigation) => (
     <Info navigation={navigation.navigation} />
@@ -40,6 +46,10 @@ const InfoComponent = (navigation) => (
 
 const InfoProvideComponent = (navigation) => (
     <InfoProvide navigation={navigation.navigation} route={navigation.route} />
+)
+
+const InfoDetailComponent = (navigation) => (
+    <InfoDetail navigation={navigation.navigation} route={navigation.route} />
 )
 
 // match page
@@ -58,7 +68,7 @@ const SettingComponent = (navigation) => (
 )
 
 const ChangePWComponent = (navigation) => (
-    <ChangePW navigation = {navigation.navigation} route={navigation.route} />
+    <ChangePW navigation={navigation.navigation} route={navigation.route} />
 )
 
 const HomeStack = createStackNavigator();
@@ -93,7 +103,19 @@ const HomeNavigator = ({ navigation, route }) => {
                 name="TrailByDistrict"
                 component={TrailDistrictComponent}
                 options={({ route }) => ({
-                    title: route.params.district,
+                    title: route.params.data[0].district,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                })}
+
+            />
+
+            <HomeStack.Screen
+                name="DetailByDistrict"
+                component={DetailByDistrictComponent}
+                options={({ route }) => ({
+                    title: route.params.title,
                     headerStyle: {
                         backgroundColor: "#E0FFF6"
                     }
@@ -129,6 +151,18 @@ const InfoNavigator = ({ navigation, route }) => {
                         backgroundColor: "#E0FFF6"
                     }
                 }}
+            />
+
+            <InfoStack.Screen
+                name="InfoDetail"
+                component={InfoDetailComponent}
+                options={{
+                    title: "資訊詳情",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
+
             />
         </InfoStack.Navigator>
     )
@@ -197,7 +231,7 @@ const SettingNavigator = ({ navigation, route }) => {
                     }
                 }}
             />
-            
+
         </SettingStack.Navigator>
     )
 }

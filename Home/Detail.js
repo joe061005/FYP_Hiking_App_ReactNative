@@ -54,6 +54,7 @@ class Detail extends React.Component {
         null
     });
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+    
 
   }
 

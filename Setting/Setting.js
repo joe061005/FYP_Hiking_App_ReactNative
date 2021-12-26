@@ -18,7 +18,8 @@ import {
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
 import { MaterialIcons, Entypo, AntDesign, FontAwesome } from "@expo/vector-icons"
-import {StackActions} from '@react-navigation/native'
+import { StackActions } from '@react-navigation/native'
+import Spinner from "react-native-loading-spinner-overlay";
 
 
 class Setting extends React.Component {
@@ -27,6 +28,7 @@ class Setting extends React.Component {
     this.state = {
       data: '',
       modal: false,
+      spinner: false
     }
     this.getuserInfo = this.getuserInfo.bind(this)
     this.logout = this.logout.bind(this)
@@ -43,25 +45,32 @@ class Setting extends React.Component {
     console.log("user_data:", this.state.data)
   }
 
-  async logout(){
-    API.logout().then(async ([code, data, header]) => {
-      if(code == '200'){
+  async logout() {
+    this.setState({ spinner: !this.state.spinner })
+    await API.logout().then(async ([code, data, header]) => {
+      if (code == '200') {
         await this.resetData()
         this.props.navigation.dispatch(
           StackActions.replace("landing")
         )
       }
     })
+    this.setState({ spinner: !this.state.spinner })
   }
 
-  async resetData(){
-   await API.resetUserData();
-   console.log('reset successfully')
+  async resetData() {
+    await API.resetUserData();
+    console.log('reset successfully')
   }
 
   render() {
     return (
       <View style={localStyles.Container}>
+        <Spinner
+          visible={this.state.spinner}
+          textContent={'正在登出...'}
+          textStyle={{ color: 'white' }}
+        />
         <Image
           source={{ uri: "https://cdn.lifestyleasia.com/wp-content/uploads/sites/2/2020/11/07194353/hong-kong-hikes-kiler-views-hero-1600x900.jpg" }}
           style={localStyles.backgroundImage}
@@ -73,7 +82,7 @@ class Setting extends React.Component {
 
         <View style={localStyles.userInfoContainer}>
           <Text style={localStyles.userNameText}>{this.state.data.username}</Text>
-          <TouchableOpacity onPress={() => { this.props.navigation.navigate("ChangePW", {username: this.state.data.username})}}>
+          <TouchableOpacity onPress={() => { this.props.navigation.navigate("ChangePW", { username: this.state.data.username }) }}>
             <View style={[localStyles.buttonContainer]}>
               <View style={[localStyles.addButton]}>
                 <FontAwesome style={[localStyles.buttonIcon]} name="unlock-alt" size={24} color="white" />
@@ -81,7 +90,7 @@ class Setting extends React.Component {
               </View>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { Alert.alert('提示', '確定要登出嗎？', [{text: '確定', onPress: () => {this.logout()}}, {text: '取消', onPress: () => {}}]) }}>
+          <TouchableOpacity onPress={() => { Alert.alert('提示', '確定要登出嗎？', [{ text: '確定', onPress: () => { this.logout() } }, { text: '取消', onPress: () => { } }]) }}>
             <View style={[localStyles.buttonContainer]}>
               <View style={[localStyles.addButton]}>
                 <MaterialIcons style={[localStyles.buttonIcon]} name="logout" size={24} color="white" />
