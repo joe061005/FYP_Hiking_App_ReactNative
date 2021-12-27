@@ -22,6 +22,7 @@ import API from "../Api/api"
 import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
 import DropDown from "react-native-dropdown-picker";
+//import Image from 'react-native-fast-image'
 
 
 
@@ -34,7 +35,7 @@ class Info extends React.Component {
       tab: "Info",
       trailInfo: [],
       info: [],
-      userInfo: [],
+      userInfo: {info:[]},
       searchText: '',
       modal: false,
       districtItem: [
@@ -50,21 +51,6 @@ class Info extends React.Component {
       districtOpen: false,
       districtValue: "",
 
-      // typeOpen: false,
-      // typeValue: [],
-      // typeItem: [
-      //   { label: "停車場", value: "停車場" },
-      //   { label: "飲食", value: "飲食" },
-      //   { label: "休息埸地", value: "休息埸地" },
-      //   { label: "廁所", value: "廁所" },
-      //   { label: "康樂", value: "康樂" },
-      //   { label: "景點", value: "景點" },
-      //   { label: "交通", value: "交通" },
-      //   { label: "危險告示", value: "危險告示" },
-      //   { label: "其他", value: "其他" },
-      // ],
-
-
     }
     this.getTabStyle = this.getTabStyle.bind(this)
     this.handleBackButton = this.handleBackButton.bind(this)
@@ -75,8 +61,7 @@ class Info extends React.Component {
     this.setDistrictOpen = this.setDistrictOpen.bind(this)
     this.setDistrictValue = this.setDistrictValue.bind(this)
     this.resetVal = this.resetVal.bind(this)
-    // this.setTypeValue = this.setTypeValue.bind(this)
-    // this.setTypeOpen = this.setTypeOpen.bind(this)
+
   }
   async componentDidMount() {
     NetInfo.fetch().then(state => {
@@ -164,8 +149,8 @@ class Info extends React.Component {
       )
   }
 
-  _onRefresh() {
-    this.getInfo()
+  async _onRefresh() {
+    await Promise.all([this.getInfo(), this.getTrailInfo(), this.getUserInfo()])
   }
 
   setDistrictValue(callback) {
@@ -180,18 +165,6 @@ class Info extends React.Component {
     this.setState({ districtOpen: open })
   }
 
-  // setTypeValue(callback) {
-  //   this.setState((state) => {
-  //     return {
-  //       typeValue: callback(state.typeValue)
-  //     }
-  //   })
-  // }
-
-  // setTypeOpen(open) {
-  //   this.setState({ typeOpen: open })
-  //}
-
   resetVal() {
     this.setState({ districtValue: '' })
   }
@@ -202,7 +175,7 @@ class Info extends React.Component {
     const recentInfo = this.state.info.map((data, index) => (
       <TouchableOpacity key={index} onPress={() => { this.props.navigation.navigate("InfoDetail", {data: data}) }}>
         <View style={[localStyles.infoItemContainer]}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image }} resizeMode="cover" />
+          <Image style={localStyles.bgImage} source={{ uri: data.image }}  defaultSource={require("../assets/loading.png")}/>
           <View style={localStyles.TextContainer}>
             <Text style={localStyles.InfoText}>種類： {data.type}</Text>
             <Text style={localStyles.InfoText}>地區： {data.district}</Text>
@@ -222,7 +195,7 @@ class Info extends React.Component {
 
     const trailInfo = trailSearch.map((data, index) => (
       <View style={localStyles.discoverItemContainer} key={index} >
-        <TouchableOpacity onPress={() => { }}>
+        <TouchableOpacity onPress={() => { data.title == '其他'? console.log('TITLE: ', data.title):this.props.navigation.navigate("InfoByTrail", {trail: data.title, id: data._id}) }}>
           <ImageBackground
             source={{ uri: data.image[0] }}
             style={localStyles.imageBG}
@@ -245,10 +218,10 @@ class Info extends React.Component {
       </View>
     )
 
-    const MyInfo = this.state.userInfo.info ? this.state.userInfo.info.map((data, index) => (
-      <TouchableOpacity key={index} onPress={() => { }}>
+    const MyInfo = this.state.userInfo.info.length>0 ? this.state.userInfo.info.slice(0).reverse().map((data, index) => (
+      <TouchableOpacity key={index} onPress={() => { this.props.navigation.navigate("InfoDetail", {data: data}) }}>
         <View style={[localStyles.infoItemContainer]}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image }} resizeMode="cover" />
+          <Image style={localStyles.bgImage} source={{ uri: data.image }} defaultSource={require("../assets/loading.png")}/>
           <View>
             <Text style={localStyles.InfoText}>種類： {data.type}</Text>
             <Text style={localStyles.InfoText}>地區： {data.district}</Text>
@@ -273,13 +246,22 @@ class Info extends React.Component {
       <>
         <TouchableOpacity onPress={() => { this.props.navigation.navigate("InfoProvide", { data: this.state.trailInfo }) }}>
           <View style={[localStyles.buttonContainer]}>
-
             <View style={[localStyles.addButton]}>
               <MaterialIcons style={[localStyles.buttonIcon]} name="add-box" size={24} color="white" />
               <Text style={[localStyles.textCenter, localStyles.addText]}>提供資訊</Text>
             </View>
           </View>
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => { }}>
+          <View style={[localStyles.buttonContainer]}>
+            <View style={[localStyles.addButton, {backgroundColor: '#009dff'}]}>
+              <MaterialIcons style={[localStyles.buttonIcon]} name="gps-fixed" size={24} color="white" />
+              <Text style={[localStyles.textCenter, localStyles.addText]}>附近的資訊</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         <ScrollView style={localStyles.InfoContainer} horizontal>
           {recentInfo}
         </ScrollView>
@@ -375,35 +357,6 @@ class Info extends React.Component {
                   }}
                   listItemContainerStyle={localStyles.itemContainer}
                 />
-
-                {/* <Text style={localStyles.formText}>資訊類型</Text>
-            <DropDown
-              open={this.state.districtOpen}
-              value={this.state.districtValue}
-              items={this.state.districtItem}
-              setOpen={this.setDistrictOpen}
-              setValue={this.setDistrictValue}
-              onChangeValue={(value) => {
-                console.log("value", value);
-              }}
-              style={localStyles.dropdown}
-              placeholder="地區"
-              placeholderStyle={localStyles.dropdownText}
-              zIndex={2000}
-              zIndexInverse={2000}
-              textStyle={localStyles.dropdownText}
-              dropDownContainerStyle={localStyles.dropdownContainer}
-              listMode="SCROLLVIEW"
-              scrollViewProps={{
-                persistentScrollbar: true
-              }}
-              listItemContainerStyle={localStyles.itemContainer}
-            /> */}
-                {/* <View style={localStyles.ConfirmButton}>
-                <TouchableOpacity onPress={ () => {this.setState({modal: false}); this.setState({})}}>
-                  <Text style={localStyles.buttonText}>套用</Text>
-                </TouchableOpacity>
-              </View> */}
               </View>
             </View>
           </View>
@@ -494,13 +447,15 @@ const localStyles = StyleSheet.create({
     alignItems: 'center',
     //paddingTop: 10,
     backgroundColor: 'white',
-    paddingBottom: 15
+    paddingBottom: 15,
+    width: '100%',
+    flexDirection: 'row'
   },
   buttonIcon: {
     marginRight: 10
   },
   addButton: {
-    width: '60%',
+    width: '80%',
     height: 53,
     backgroundColor: 'rgba(45, 74, 105, 1)',
     justifyContent: 'center',
@@ -537,7 +492,7 @@ const localStyles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     borderColor: 'black',
-
+    marginTop: 20,
     marginRight: 20,
 
   },

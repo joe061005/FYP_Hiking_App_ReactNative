@@ -113,8 +113,8 @@ class InfoDetail extends React.Component {
                     region={{
                         latitude: data.location.latitude,
                         longitude: data.location.longitude,
-                        latitudeDelta: 0.0222,
-                        longitudeDelta: 0.0221
+                        latitudeDelta: 0.0022,
+                        longitudeDelta: 0.0021
                     }}
                     style={{ height: 300, marginTop: 10 }}
                     showsUserLocation={true}

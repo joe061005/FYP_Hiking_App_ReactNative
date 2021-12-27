@@ -20,6 +20,7 @@ import InfoProvide from "../Info/InfoProvide";
 import ChangePW from "../Setting/ChangePW"
 import DetailByDistrict from "../Home/DetailByDistrict";
 import InfoDetail from "../Info/InfoDetail";
+import InfoByTrail from "../Info/InfoByTrail";
 
 //Home page
 
@@ -50,6 +51,10 @@ const InfoProvideComponent = (navigation) => (
 
 const InfoDetailComponent = (navigation) => (
     <InfoDetail navigation={navigation.navigation} route={navigation.route} />
+)
+
+const InfoByTrailComponent = (navigation) => (
+    <InfoByTrail navigation={navigation.navigation} route={navigation.route} />
 )
 
 // match page
@@ -163,6 +168,17 @@ const InfoNavigator = ({ navigation, route }) => {
                     }
                 }}
 
+            />
+
+            <InfoStack.Screen
+                name="InfoByTrail"
+                component={InfoByTrailComponent}
+                options={({route}) => ({
+                    title: route.params.trail,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                })}
             />
         </InfoStack.Navigator>
     )

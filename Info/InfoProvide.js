@@ -441,8 +441,8 @@ class InfoProvide extends React.Component {
                 region={{
                   latitude: this.state.location.coords.latitude,
                   longitude: this.state.location.coords.longitude,
-                  latitudeDelta: 0.0222,
-                  longitudeDelta: 0.0221
+                  latitudeDelta: 0.0022,
+                  longitudeDelta: 0.0021
                 }}
                 style={{ height: 300 , marginLeft:20, marginTop: 10}}
                 showsUserLocation={true}
