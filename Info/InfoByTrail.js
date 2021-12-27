@@ -186,7 +186,7 @@ class InfoByTrail extends React.Component {
             }}
             >
                 <View style={[localStyles.infoItemContainer]}>
-                    <Image style={localStyles.bgImage} source={{ uri: data.image }} resizeMode="cover" defaultSource={require("../assets/loading.png")} />
+                    <Image style={localStyles.bgImage} source={{ uri: data.image , cache:'force-cache'}} resizeMode="cover" defaultSource={require("../assets/loading.png")} />
                     <View style={localStyles.TextContainer}>
                         <Text style={localStyles.InfoText}>種類： {data.type}</Text>
                         <Text style={localStyles.InfoText}>地區： {data.district}</Text>

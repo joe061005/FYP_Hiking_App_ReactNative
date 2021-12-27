@@ -84,7 +84,7 @@ class InfoDetail extends React.Component {
         console.log("InfoDetailData: ", data)
         return (
             <ScrollView style={localStyles.Container}>
-                <Image source={{ uri: data.image }} resizeMode="cover" style={localStyles.image} />
+                <Image source={{ uri: data.image, cache:'force-cache' }} resizeMode="cover" style={localStyles.image} />
                 <View style={localStyles.InfoContainer}>
                     <View style={localStyles.InfoItemContainer}>
                         <View style={localStyles.InfoTitleContainer}>

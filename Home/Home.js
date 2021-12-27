@@ -111,7 +111,7 @@ class Home extends React.Component {
     const hikingTrailData = this.state.trails.slice(0,5).map((data, index1) =>
       <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
         <View style={localStyles.trailContainer}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image[0] }} />
+          <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache:'force-cache' }} />
           <View style={localStyles.TextContainer}>
             <Text style={[localStyles.TrailText, { fontWeight: "bold" }]}>{data.title}</Text>
             <View style={{ flexDirection: 'row' }}>

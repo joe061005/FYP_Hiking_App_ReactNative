@@ -22,7 +22,7 @@ import API from "../Api/api"
 import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
 import DropDown from "react-native-dropdown-picker";
-//import Image from 'react-native-fast-image'
+
 
 
 
@@ -175,7 +175,7 @@ class Info extends React.Component {
     const recentInfo = this.state.info.map((data, index) => (
       <TouchableOpacity key={index} onPress={() => { this.props.navigation.navigate("InfoDetail", {data: data}) }}>
         <View style={[localStyles.infoItemContainer]}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image }}  defaultSource={require("../assets/loading.png")}/>
+          <Image style={localStyles.bgImage} source={{ uri: data.image, cache:'force-cache'}} resizeMode="cover" defaultSource={require("../assets/loading.png")}/>
           <View style={localStyles.TextContainer}>
             <Text style={localStyles.InfoText}>種類： {data.type}</Text>
             <Text style={localStyles.InfoText}>地區： {data.district}</Text>
@@ -221,7 +221,7 @@ class Info extends React.Component {
     const MyInfo = this.state.userInfo.info.length>0 ? this.state.userInfo.info.slice(0).reverse().map((data, index) => (
       <TouchableOpacity key={index} onPress={() => { this.props.navigation.navigate("InfoDetail", {data: data}) }}>
         <View style={[localStyles.infoItemContainer]}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image }} defaultSource={require("../assets/loading.png")}/>
+          <Image style={localStyles.bgImage} source={{ uri: data.image, cache:'force-cache' }} resizeMode="cover" defaultSource={require("../assets/loading.png")}/>
           <View>
             <Text style={localStyles.InfoText}>種類： {data.type}</Text>
             <Text style={localStyles.InfoText}>地區： {data.district}</Text>

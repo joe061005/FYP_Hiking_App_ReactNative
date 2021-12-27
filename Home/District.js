@@ -119,7 +119,7 @@ class District extends React.Component {
     const hikingTrailData = trailSearch.map((data, index1) =>
       <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
         <View style={[localStyles.trailItemContainer, index1 == trailSearch.length - 1 ? { marginBottom: 100 } : {}]}>
-          <Image style={localStyles.bgImage} source={{ uri: data.image[0] }} />
+          <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache:'force-cache'}} />
           <View style={localStyles.TextContainer}>
             <Text style={[localStyles.TrailText, { fontWeight: "bold" }]}>{data.title}</Text>
             <View style={{ flexDirection: 'row' }}>
@@ -149,7 +149,7 @@ class District extends React.Component {
 
     return (
       <View style={localStyles.Container}>
-        <Image source={{ uri: this.props.route.params.image }} style={localStyles.backgroundImage} />
+        <Image source={{ uri: this.props.route.params.image, cache:'force-cache' }} style={localStyles.backgroundImage} />
         <ScrollView style={localStyles.trailContainer}>
           <View style={[localStyles.inputContainer]}>
             <View style={[localStyles.trailInput]}>
