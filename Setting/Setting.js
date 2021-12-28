@@ -72,11 +72,12 @@ class Setting extends React.Component {
           textStyle={{ color: 'white' }}
         />
         <Image
-          source={{ uri: "https://cdn.lifestyleasia.com/wp-content/uploads/sites/2/2020/11/07194353/hong-kong-hikes-kiler-views-hero-1600x900.jpg" }}
+          source={{ uri: "https://cdn.lifestyleasia.com/wp-content/uploads/sites/2/2020/11/07194353/hong-kong-hikes-kiler-views-hero-1600x900.jpg", cache:'force-cache' }}
           style={localStyles.backgroundImage}
+          
         />
         <Image
-          source={{ uri: 'https://usergenerator.canekzapata.net/2e4566fd829bcf9eb11ccdb5f252b02f.jpeg' }}
+          source={{ uri: 'https://usergenerator.canekzapata.net/2e4566fd829bcf9eb11ccdb5f252b02f.jpeg', cache:'force-cache'  }}
           style={localStyles.userImage}
         />
 

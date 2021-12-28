@@ -195,7 +195,7 @@ class Info extends React.Component {
 
     const trailInfo = trailSearch.map((data, index) => (
       <View style={localStyles.discoverItemContainer} key={index} >
-        <TouchableOpacity onPress={() => { data.title == '其他'? console.log('TITLE: ', data.title):this.props.navigation.navigate("InfoByTrail", {trail: data.title, id: data._id}) }}>
+        <TouchableOpacity onPress={() => { data.title == '其他'? this.props.navigation.navigate("OtherInfo"):this.props.navigation.navigate("InfoByTrail", {trail: data.title, id: data._id}) }}>
           <ImageBackground
             source={{ uri: data.image[0] }}
             style={localStyles.imageBG}
@@ -253,7 +253,7 @@ class Info extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { }}>
+        <TouchableOpacity onPress={() => { this.props.navigation.navigate("InfoByTrail", {trail: '探索附近的資訊', id: 0})}}>
           <View style={[localStyles.buttonContainer]}>
             <View style={[localStyles.addButton, {backgroundColor: '#009dff'}]}>
               <MaterialIcons style={[localStyles.buttonIcon]} name="gps-fixed" size={24} color="white" />

@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     Platform,
 } from "react-native";
+import { Entypo } from '@expo/vector-icons';
 import Home from "../Home/Home"
 import Info from "../Info/Info"
 import Record from "../Record/Record"
@@ -21,6 +22,7 @@ import ChangePW from "../Setting/ChangePW"
 import DetailByDistrict from "../Home/DetailByDistrict";
 import InfoDetail from "../Info/InfoDetail";
 import InfoByTrail from "../Info/InfoByTrail";
+import OtherInfo from "../Info/OtherInfo";
 
 //Home page
 
@@ -55,6 +57,10 @@ const InfoDetailComponent = (navigation) => (
 
 const InfoByTrailComponent = (navigation) => (
     <InfoByTrail navigation={navigation.navigation} route={navigation.route} />
+)
+
+const OtherInfoComponent = (navigation) => (
+    <OtherInfo navigation={navigation} route={navigation.route} />
 )
 
 // match page
@@ -127,6 +133,18 @@ const HomeNavigator = ({ navigation, route }) => {
                 })}
 
             />
+
+            <HomeStack.Screen
+                name="Info"
+                component={InfoByTrailComponent}
+                options={({ route }) => ({
+                    title: `${route.params.trail}資訊`,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                })}
+            />
+
         </HomeStack.Navigator>
     )
 }
@@ -173,12 +191,23 @@ const InfoNavigator = ({ navigation, route }) => {
             <InfoStack.Screen
                 name="InfoByTrail"
                 component={InfoByTrailComponent}
-                options={({route}) => ({
+                options={({ route }) => ({
                     title: route.params.trail,
                     headerStyle: {
                         backgroundColor: "#E0FFF6"
                     }
                 })}
+            />
+
+            <InfoStack.Screen
+                name="OtherInfo"
+                component={OtherInfoComponent}
+                options={{
+                    title: "其他資訊",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
             />
         </InfoStack.Navigator>
     )

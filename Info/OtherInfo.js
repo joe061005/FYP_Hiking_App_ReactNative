@@ -28,15 +28,12 @@ import * as Location from 'expo-location';
 
 
 
-class InfoByTrail extends React.Component {
+class OtherInfo extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            refreshing: false,
             dataFetched: false,
-            //  searchText: '',
             modal: false,
-
             typeOpen: false,
             typeValue: [],
             typeItem: [
@@ -50,11 +47,20 @@ class InfoByTrail extends React.Component {
                 { label: "危險告示", value: "危險告示" },
                 { label: "其他", value: "其他" },
             ],
+            districtItem: [
+                { label: "新界東北", value: "新界東北" },
+                { label: "香港島", value: "香港島" },
+                { label: "九龍及將軍澳", value: "九龍及將軍澳" },
+                { label: "西貢", value: "西貢" },
+                { label: "大嶼山", value: "大嶼山" },
+                { label: "新界西北", value: "新界西北" },
+                { label: "新界中部", value: "新界中部" },
+                { label: "離島", value: "離島" }
+            ],
+            districtOpen: false,
+            districtValue: [],
             Info: { info: [] },
             ItemPosition: [],
-            location: {},
-            nearBy: false,
-
 
         }
         this.handleBackButton = this.handleBackButton.bind(this)
@@ -64,10 +70,11 @@ class InfoByTrail extends React.Component {
         this.setTypeOpen = this.setTypeOpen.bind(this)
         this.getInfoByTrail = this.getInfoByTrail.bind(this)
         this.onMarkerPress = this.onMarkerPress.bind(this)
-        this.getNearbyInfo = this.getNearbyInfo.bind(this)
-        this.setInfo = this.setInfo.bind(this)
+        this.setDistrictOpen = this.setDistrictOpen.bind(this)
+        this.setDistrictValue = this.setDistrictValue.bind(this)
+
     }
-    async componentDidMount() {
+    componentDidMount() {
         NetInfo.fetch().then(state => {
             console.log('Connection type', state.type);
             console.log('Is connected?', state.isConnected);
@@ -82,14 +89,7 @@ class InfoByTrail extends React.Component {
         });
 
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        if (this.props.route.params.trail == '探索附近的資訊') {
-            this.getNearbyInfo()
-        } else if (this.props.route.params.data) {
-            this.setInfo()
-        }
-        else {
-            this.getInfoByTrail();
-        }
+        this.getInfoByTrail();
 
     }
 
@@ -124,41 +124,14 @@ class InfoByTrail extends React.Component {
     }
 
     async getInfoByTrail() {
-        API.getInfoByTrail(this.props.route.params.id).then(([code, data, header]) => {
+        API.getOtherInfo().then(([code, data, header]) => {
             if (code == '200') {
-                this.setState({ Info: data })
-                this.setState({ dataFetched: true })
-                console.log("INFOBYTRAIL: ", this.state.Info)
-
-                // set a temporary array for the 'scroll to' function
-                let tempoArray = []
-                this.state.Info.info.map((data) => {
-                    tempoArray.push(0)
-                })
-                this.setState({ ItemPosition: tempoArray })
-            }
-        })
-    }
-
-    async getNearbyInfo() {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('提示', '你需要提供授權才可以使用此功能', [{ text: '確定', onPress: () => { this.props.navigation.goBack() } }])
-            return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-        this.setState({ location })
-        console.log("LOCATION", this.state.location)
-
-        API.getNearbyInfo(this.state.location.coords.latitude, this.state.location.coords.longitude).then(([code, data, header]) => {
-            if (code == '200') {
-                // create a temporary array which is in specific format
                 const tempInfoArr = { info: [] }
                 data.map((data) => {
                     tempInfoArr.info.push(data)
                 })
-                this.setState({ Info: tempInfoArr })
+
+                this.setState({ Info: tempInfoArr})
                 this.setState({ dataFetched: true })
                 console.log("INFOBYTRAIL: ", this.state.Info)
 
@@ -168,22 +141,8 @@ class InfoByTrail extends React.Component {
                     tempoArray.push(0)
                 })
                 this.setState({ ItemPosition: tempoArray })
-                this.setState({ nearBy: true })
             }
         })
-    }
-
-    async setInfo() {
-        this.setState({ Info: this.props.route.params.data })
-        this.setState({ dataFetched: true })
-        console.log("INFOBYTRAIL: ", this.props.route.params.data)
-
-        // set a temporary array for the 'scroll to' function
-        let tempoArray = []
-        this.props.route.params.data.info.map((data) => {
-            tempoArray.push(0)
-        })
-        this.setState({ ItemPosition: tempoArray })
     }
 
 
@@ -199,8 +158,20 @@ class InfoByTrail extends React.Component {
         this.setState({ typeOpen: open })
     }
 
+    setDistrictValue(callback) {
+        this.setState((state) => {
+            return {
+                districtValue: callback(state.districtValue)
+            }
+        })
+    }
+
+    setDistrictOpen(open) {
+        this.setState({ districtOpen: open })
+    }
+
     resetVal() {
-        this.setState({ typeValue: [] })
+        this.setState({ typeValue: [], districtValue: [] })
     }
 
     onMarkerPress(index) {
@@ -542,4 +513,4 @@ const localStyles = StyleSheet.create({
 
 })
 
-export default InfoByTrail
+export default OtherInfo

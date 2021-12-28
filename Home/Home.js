@@ -109,7 +109,7 @@ class Home extends React.Component {
   render() {
     // loop through the hiking trail data
     const hikingTrailData = this.state.trails.slice(0,5).map((data, index1) =>
-      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
+      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title, id: data._id })}>
         <View style={localStyles.trailContainer}>
           <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache:'force-cache' }} />
           <View style={localStyles.TextContainer}>

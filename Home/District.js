@@ -117,7 +117,7 @@ class District extends React.Component {
     )
     // loop through the hiking trail data
     const hikingTrailData = trailSearch.map((data, index1) =>
-      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title })}>
+      <TouchableOpacity key={index1} onPress={() => this.props.navigation.navigate("DetailByDistrict", { title: data.title, id: data._id })}>
         <View style={[localStyles.trailItemContainer, index1 == trailSearch.length - 1 ? { marginBottom: 100 } : {}]}>
           <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache:'force-cache'}} />
           <View style={localStyles.TextContainer}>

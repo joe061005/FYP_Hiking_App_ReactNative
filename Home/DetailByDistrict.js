@@ -26,7 +26,7 @@ import {
     StackedBarChart
 } from "react-native-chart-kit";
 import { SliderBox } from "react-native-image-slider-box"
-import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome , AntDesign, Entypo} from '@expo/vector-icons';
 import { Table, TableWrapper, Row, Rows, Col } from 'react-native-table-component-2';
 import * as Progress from 'react-native-progress'
 import API from "../Api/api"
@@ -38,14 +38,16 @@ class DetailByDistrict extends React.Component {
             region: {},
             startTableHead: ['交通', '路線', '下車點', '備註'],
             endTableHead: ['交通', '路線', '上車點', '備註'],
-            data: {time: '', star: [], path: [{latitude: 0, longitude: 0}],xlabel: [], marker: [], trafficStart: [], trafficEnd: []},
+            data: { time: '', star: [], path: [{ latitude: 0, longitude: 0 }], xlabel: [], marker: [], trafficStart: [], trafficEnd: [] },
             dataFetched: false,
+            Info: [],
         }
         this.handleBackButton = this.handleBackButton.bind(this)
         this.getInfo = this.getInfo.bind(this)
+        this.getInfoByTrail = this.getInfoByTrail.bind(this)
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         NetInfo.fetch().then(state => {
             console.log('Connection type', state.type);
             console.log('Is connected?', state.isConnected);
@@ -59,7 +61,7 @@ class DetailByDistrict extends React.Component {
                 null
         });
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        this.getInfo()
+        await Promise.all([this.getInfo(), this.getInfoByTrail()])
 
 
     }
@@ -99,8 +101,21 @@ class DetailByDistrict extends React.Component {
         })
     }
 
+    async getInfoByTrail() {
+        API.getInfoByTrail(this.props.route.params.id).then(([code, data, header]) => {
+            if (code == '200') {
+                this.setState({ Info: data })
+
+            }
+        })
+    }
+
+
+
 
     render() {
+
+        //console.log("ID: ", this.props.route.params.id)
 
         const hiking_trail = (
             <View>
@@ -114,7 +129,21 @@ class DetailByDistrict extends React.Component {
                 />
 
                 <View style={localStyles.trailInfoContainer}>
-                    <Text style={localStyles.TitleText}>路線資料</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                        <View>
+                            <Text style={localStyles.TitleText}>路線資料</Text>
+                        </View>
+                        <View>
+                            <TouchableOpacity onPress={() => { this.props.navigation.navigate("Info", {trail: this.props.route.params.title, data: this.state.Info})}}>
+                                <View style={[localStyles.buttonContainer]}>
+                                    <View style={[localStyles.addButton, { width: '100%', backgroundColor: '#009dff' }]}>
+                                        <Entypo style={[localStyles.buttonIcon]} name="info-with-circle" size={24} color="white" />
+                                        <Text style={[localStyles.textCenter, localStyles.addText]}>路線資訊</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                     <View style={localStyles.InfoContainer}>
                         <View style={localStyles.InfoItemContainer}>
                             <View style={localStyles.InfoTitleContainer}>
@@ -361,7 +390,41 @@ const localStyles = StyleSheet.create({
     RefText: {
         fontSize: 25,
         fontWeight: 'bold'
-    }
+    },
+    buttonContainer: {
+        marginLeft: 40,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        //paddingTop: 10,
+        backgroundColor: 'white',
+        paddingBottom: 15,
+        width: '60%',
+        flexDirection: 'row',
+        marginTop: -2
+      },
+      buttonIcon: {
+        marginRight: 10
+      },
+      addButton: {
+        width: '80%',
+        height: 30,
+        backgroundColor: 'rgba(45, 74, 105, 1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 27.5,
+        flexDirection: 'row'
+        //marginBottom: 15
+      },
+      addText: {
+        fontSize: 20,
+        color: 'rgba(255, 255, 255, 1)',
+        fontWeight: '900'
+      },
+      textCenter: {
+        textAlign: 'center',
+        justifyContent: 'center'
+      },
 
 
 })

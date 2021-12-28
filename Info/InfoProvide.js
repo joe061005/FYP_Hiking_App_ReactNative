@@ -496,7 +496,7 @@ class InfoProvide extends React.Component {
                     }}
                     theme={theme}
                   >
-                    camera
+                    相機
                   </Button>
                   <Button
                     icon="image-area"
@@ -506,11 +506,11 @@ class InfoProvide extends React.Component {
                     }}
                     theme={theme}
                   >
-                    gallery
+                    相簿
                   </Button>
                 </View>
                 <Button onPress={() => this.setState({ modal: false })} theme={theme}>
-                  cancel
+                  取消
                 </Button>
               </View>
             </Modal>

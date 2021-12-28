@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://d308-223-19-143-35.ngrok.io/'
+    baseURL: 'https://2fb7-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -172,6 +172,21 @@ var api = {
         }
         return get(request)
 
+    },
+
+    getOtherInfo: () => {
+        var request = {
+            method: 'info/getOtherInfo'
+        }
+
+        return get(request)
+    },
+
+    getNearbyInfo: (lat,long) => {
+        var request={
+            method: `info/getNearbyInfo/${lat}/${long}`
+        }
+        return get(request)
     },
 
     // setting page
