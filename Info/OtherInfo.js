@@ -131,7 +131,7 @@ class OtherInfo extends React.Component {
                     tempInfoArr.info.push(data)
                 })
 
-                this.setState({ Info: tempInfoArr})
+                this.setState({ Info: tempInfoArr })
                 this.setState({ dataFetched: true })
                 console.log("INFOBYTRAIL: ", this.state.Info)
 
@@ -188,11 +188,15 @@ class OtherInfo extends React.Component {
     render() {
 
         const infoSearch = this.state.Info.info.filter((data) => {
-            if (this.state.typeValue.length == 0) {
+            if (this.state.typeValue.length == 0 && this.state.districtValue.length == 0) {
                 return true
+            } else if (this.state.typeValue.length > 0 && this.state.districtValue.length > 0) {
+                return this.state.typeValue.includes(data.type) && this.state.districtValue.includes(data.district)
+            } else if (this.state.typeValue.length > 0) {
+                return this.state.typeValue.includes(data.type)
             }
 
-            return this.state.typeValue.includes(data.type)
+            return this.state.districtValue.includes(data.district)
         })
 
         const trailInfo = infoSearch.map((data, index) => (
@@ -239,10 +243,10 @@ class OtherInfo extends React.Component {
         const firstComponent = this.state.Info.info.length > 0 ?
             <MapView
                 region={{
-                    latitude: this.state.Info.info[0].location.latitude,
-                    longitude: this.state.Info.info[0].location.longitude,
-                    latitudeDelta: 0.0222,
-                    longitudeDelta: 0.0221
+                    latitude: 22.29258,
+                    longitude: 114.18247,
+                    latitudeDelta: 0.2222,
+                    longitudeDelta: 0.2221
                 }}
                 style={{ height: 300 }}
                 showsUserLocation={true}
@@ -349,7 +353,36 @@ class OtherInfo extends React.Component {
                                     min={0}
                                     mode="BADGE"
                                 />
+
+                                <Text style={localStyles.formText}>地區(你可以選擇多於一項）</Text>
+                                <DropDown
+                                    open={this.state.districtOpen}
+                                    value={this.state.districtValue}
+                                    items={this.state.districtItem}
+                                    setOpen={this.setDistrictOpen}
+                                    setValue={this.setDistrictValue}
+                                    onChangeValue={(value) => {
+                                        console.log("value", value);
+                                    }}
+                                    style={localStyles.dropdown}
+                                    placeholder="地區"
+                                    placeholderStyle={localStyles.dropdownText}
+                                    zIndex={2000}
+                                    zIndexInverse={2000}
+                                    textStyle={localStyles.dropdownText}
+                                    dropDownContainerStyle={localStyles.dropdownContainer}
+                                    listMode="SCROLLVIEW"
+                                    scrollViewProps={{
+                                        persistentScrollbar: true
+                                    }}
+                                    listItemContainerStyle={localStyles.itemContainer}
+                                    multiple={true}
+                                    min={0}
+                                    mode="BADGE"
+                                />
+
                             </View>
+                          
                         </View>
                     </View>
 
@@ -396,7 +429,7 @@ const localStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
-        width: '100%'
+        width: '90%'
     },
     emptyContent: {
         width: '100%',

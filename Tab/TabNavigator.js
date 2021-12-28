@@ -60,7 +60,7 @@ const InfoByTrailComponent = (navigation) => (
 )
 
 const OtherInfoComponent = (navigation) => (
-    <OtherInfo navigation={navigation} route={navigation.route} />
+    <OtherInfo navigation={navigation.navigation} route={navigation.route} />
 )
 
 // match page
