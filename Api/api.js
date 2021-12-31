@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://0179-223-19-143-35.ngrok.io/'
+    baseURL: 'https://25e8-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -182,11 +182,70 @@ var api = {
         return get(request)
     },
 
-    getNearbyInfo: (lat,long) => {
-        var request={
+    getNearbyInfo: (lat, long) => {
+        var request = {
             method: `info/getNearbyInfo/${lat}/${long}`
         }
         return get(request)
+    },
+
+    //record page
+
+    storeRecord: async (record) => {
+        let recordStorage = await AsyncStorage.getItem('recordStorage')
+        console.log("RecordStorage: ", JSON.parse(recordStorage))
+        console.log("Record: ", record)
+
+        if (!recordStorage) {
+            try {
+                const firstRecord = [record]
+                await AsyncStorage.setItem('recordStorage', JSON.stringify(firstRecord))
+                return
+            } catch (err) {
+                console.log("lerror: ", err)
+            }
+        }
+
+        try {
+            const recordArr = JSON.parse(recordStorage)
+            recordArr.push(record)
+            await AsyncStorage.setItem('recordStorage', JSON.stringify(recordArr))
+        } catch (err) {
+            console.log("error: ", err)
+        }
+    },
+
+    deleteAllRecords: async () => {
+        try {
+
+            await AsyncStorage.removeItem('recordStorage')
+
+        } catch (err) {
+            console.log("error: ", err)
+        }
+    },
+
+    getRecord: async () => {
+        try {
+            let recordStorage = await AsyncStorage.getItem('recordStorage')
+            return JSON.parse(recordStorage)
+        } catch (err) {
+            console.log("error: ", err)
+        }
+    },
+
+    deleteRecord: async (index) => {
+        try {
+            let recordStorage = await AsyncStorage.getItem('recordStorage')
+            recordStorage = JSON.parse(recordStorage)
+            const newRecordArr = [...recordStorage.slice(0,index), ...recordStorage.slice(index+1)]
+            await AsyncStorage.setItem('recordStorage', JSON.stringify(newRecordArr))
+            return true;
+        } catch (err) {
+            console.log("error: ", err)
+        }
+
+        return false;
     },
 
     // setting page

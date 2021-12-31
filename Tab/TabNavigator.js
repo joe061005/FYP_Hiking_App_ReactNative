@@ -23,6 +23,7 @@ import DetailByDistrict from "../Home/DetailByDistrict";
 import InfoDetail from "../Info/InfoDetail";
 import InfoByTrail from "../Info/InfoByTrail";
 import OtherInfo from "../Info/OtherInfo";
+import RecordList from "../Record/RecordList"
 
 //Home page
 
@@ -63,9 +64,13 @@ const OtherInfoComponent = (navigation) => (
     <OtherInfo navigation={navigation.navigation} route={navigation.route} />
 )
 
-// match page
+// record page
 const RecordComponent = (navigation) => (
     <Record navigation={navigation.navigation} />
+)
+
+const RecordListComponent = (navigation) => (
+    <RecordList navigation={navigation.navigation} />
 )
 
 // group page
@@ -228,6 +233,17 @@ const RecordNavigator = ({ navigation, route }) => {
                     }
                 }}
             />
+
+            <GroupStack.Screen
+                name="RecordList"
+                component={RecordListComponent}
+                options={{
+                    title: "記錄列表",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
+            />
         </RecordStack.Navigator>
     )
 }
@@ -247,6 +263,9 @@ const GroupNavigator = ({ navigation, route }) => {
                     }
                 }}
             />
+
+
+
         </GroupStack.Navigator>
     )
 }
