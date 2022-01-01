@@ -212,7 +212,7 @@ class InfoProvide extends React.Component {
         this.setState({ modal: false })
       }
     } else {
-      Alert.alert("you need to give permission!");
+      Alert.alert("你需要提供授權!");
     }
   }
 
@@ -237,7 +237,7 @@ class InfoProvide extends React.Component {
         this.setState({ modal: false })
       }
     } else {
-      Alert.alert("you need to give permission!");
+      Alert.alert("你需要提供授權!");
     }
   }
 

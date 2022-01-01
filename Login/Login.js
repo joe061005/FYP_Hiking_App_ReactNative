@@ -755,7 +755,7 @@ class Login extends React.Component {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"} keyboardVerticalOffset={Platform.OS == 'ios' ? 0 : -300}>
         <ScrollView
           // style= {{
-          //   flex: 1
+          //   flex: 1ƒ
           // }}
           contentContainerStyle={{
             flexGrow: 1,

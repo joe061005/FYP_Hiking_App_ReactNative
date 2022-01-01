@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://25e8-223-19-143-35.ngrok.io/'
+    baseURL: 'https://dd1e-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -246,6 +246,15 @@ var api = {
         }
 
         return false;
+    },
+
+    sendUserLocation: (props) => {
+        var request= {
+            method: 'record/sendUserLocation',
+            params: props
+        }
+
+        return post(request)
     },
 
     // setting page
