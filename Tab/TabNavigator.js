@@ -24,7 +24,7 @@ import InfoDetail from "../Info/InfoDetail";
 import InfoByTrail from "../Info/InfoByTrail";
 import OtherInfo from "../Info/OtherInfo";
 import RecordList from "../Record/RecordList"
-// import Safety from "../Record/Safety";
+import AddContact from "../Record/AddContact";
 
 //Home page
 
@@ -74,9 +74,9 @@ const RecordListComponent = (navigation) => (
     <RecordList navigation={navigation.navigation} />
 )
 
-// const SafetyComponent = (navigation) => (
-//     <Safety navigation={navigation.navigation} />
-// )
+const AddContactComponent = (navigation) => (
+    <AddContact navigation={navigation.navigation} />
+)
 
 // group page
 const GroupComponent = (navigation) => (
@@ -250,16 +250,16 @@ const RecordNavigator = ({ navigation, route }) => {
                 }}
             />
 
-            {/* <GroupStack.Screen
-                name="Safety"
-                component={SafetyComponent}
+            <GroupStack.Screen
+                name="AddContact"
+                component={AddContactComponent}
                 options={{
-                    title: "安全出遊",
+                    title: "增加聯絡人",
                     headerStyle: {
                         backgroundColor: "#E0FFF6"
                     }
                 }}
-            /> */}
+            />
         </RecordStack.Navigator>
     )
 }

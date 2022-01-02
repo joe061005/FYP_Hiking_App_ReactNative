@@ -43,14 +43,14 @@ class Test extends React.Component {
 
   async getRecord() {
     const record = await API.getRecord()
-    this.setState({ record })
+    record && this.setState({ record })
     console.log("RecordList: ", this.state.record)
   }
 
   async deleteRecord(index) {
-    if(await API.deleteRecord(index)){
-      this.setState(({record}) => ({
-        record: [...record.slice(0,index), ...record.slice(index+1)]
+    if (await API.deleteRecord(index)) {
+      this.setState(({ record }) => ({
+        record: [...record.slice(0, index), ...record.slice(index + 1)]
       }))
     }
   }
@@ -59,33 +59,45 @@ class Test extends React.Component {
   render() {
     return (
       <ScrollView style={localStyles.container}>
-        {this.state.record.map((data, index) => (
-          <View style={localStyles.ItemContainer} key={index}>
-            <MapView
-              region={{
-                latitude: data.locationArr[0].latitude,
-                longitude: data.locationArr[0].longitude,
-                latitudeDelta: 0.0022,
-                longitudeDelta: 0.0021
-              }}
-              style={localStyles.MapView}
-            >
-              <Polyline
-                coordinates={data.locationArr}
-                strokeColor="#000"
-                strokeWidth={2}
-              />
-            </MapView>
-            <View style={{ marginLeft: 5 }}>
-              <Text style={localStyles.Text}>{`日期: ${data.date}    總時間: ${data.totalTime}`}</Text>
-              <TouchableOpacity onPress= {() => {Alert.alert('提示', '確定要刪除此記錄嗎？', [{text: '確定', onPress: () => {this.deleteRecord(index)}}, {text: '取消'}])}} style={localStyles.DeleteButton}>
+        {this.state.record.length > 0 ?
+
+          this.state.record.map((data, index) => (
+            <View style={localStyles.ItemContainer} key={index}>
+              <MapView
+                region={{
+                  latitude: data.locationArr[0].latitude,
+                  longitude: data.locationArr[0].longitude,
+                  latitudeDelta: 0.0022,
+                  longitudeDelta: 0.0021
+                }}
+                style={localStyles.MapView}
+              >
+                <Polyline
+                  coordinates={data.locationArr}
+                  strokeColor="#000"
+                  strokeWidth={2}
+                />
+              </MapView>
+              <View style={{ marginLeft: 5 }}>
+                <Text style={localStyles.Text}>{`日期: ${data.date}    總時間: ${data.totalTime}`}</Text>
+                <TouchableOpacity onPress={() => { Alert.alert('提示', '確定要刪除此記錄嗎？', [{ text: '確定', onPress: () => { this.deleteRecord(index) } }, { text: '取消' }]) }} style={localStyles.DeleteButton}>
                   <MaterialIcons name='delete' size={24} color='white' />
                   <Text style={localStyles.deleteButtonText}>刪除</Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+          ))
+          :
+
+          <View style={[localStyles.emptyTextContainer]}>
+            <View style={[localStyles.emptyContent]}>
+              <Text style={[localStyles.emptyText, localStyles.textCenter]}>
+                沒有遠足記錄
+              </Text>
             </View>
           </View>
 
-        ))
         }
       </ScrollView>
     )
@@ -127,7 +139,28 @@ const localStyles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     marginLeft: 5
-  }
+  },
+  emptyTextContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%'
+  },
+  emptyContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 27.5,
+  },
+  emptyText: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: '400',
+  },
+  textCenter: {
+    textAlign: 'center',
+    justifyContent: 'center'
+  },
 
 
 

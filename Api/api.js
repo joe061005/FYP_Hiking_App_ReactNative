@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://dd1e-223-19-143-35.ngrok.io/'
+    baseURL: 'https://6cea-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -202,7 +202,7 @@ var api = {
                 await AsyncStorage.setItem('recordStorage', JSON.stringify(firstRecord))
                 return
             } catch (err) {
-                console.log("lerror: ", err)
+                console.log("error: ", err)
             }
         }
 
@@ -255,6 +255,52 @@ var api = {
         }
 
         return post(request)
+    },
+
+    addContact: async(contact) => {
+        let recordStorage = await AsyncStorage.getItem('MyContacts')
+        console.log("RecordStorage: ", JSON.parse(recordStorage))
+        console.log("Record: ", contact)
+
+        if (!recordStorage) {
+            try {
+                const firstRecord = [contact]
+                await AsyncStorage.setItem('MyContacts', JSON.stringify(firstRecord))
+                return
+            } catch (err) {
+                console.log("error: ", err)
+            }
+        }
+
+        try {
+            const recordArr = JSON.parse(recordStorage)
+            recordArr.push(contact)
+            await AsyncStorage.setItem('MyContacts', JSON.stringify(recordArr))
+        } catch (err) {
+            console.log("error: ", err)
+        }
+    },
+
+    getContact: async() => {
+        try {
+            let recordStorage = await AsyncStorage.getItem('MyContacts')
+            return JSON.parse(recordStorage)
+        } catch (err) {
+            console.log("error: ", err)
+        }
+    },
+
+    deleteContact: async(index) => {
+        try {
+            let recordStorage = await AsyncStorage.getItem('MyContacts')
+            recordStorage = JSON.parse(recordStorage)
+            const newRecordArr = [...recordStorage.slice(0,index), ...recordStorage.slice(index+1)]
+            await AsyncStorage.setItem('MyContacts', JSON.stringify(newRecordArr))
+            return true;
+        } catch (err) {
+            console.log("error: ", err)
+        }
+        return false;
     },
 
     // setting page
