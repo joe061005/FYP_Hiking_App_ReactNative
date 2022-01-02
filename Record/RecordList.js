@@ -39,6 +39,7 @@ class Test extends React.Component {
 
   componentDidMount() {
     this.getRecord()
+    //this.deleteRecord(0)
   }
 
   async getRecord() {
@@ -60,7 +61,6 @@ class Test extends React.Component {
     return (
       <ScrollView style={localStyles.container}>
         {this.state.record.length > 0 ?
-
           this.state.record.map((data, index) => (
             <View style={localStyles.ItemContainer} key={index}>
               <MapView
@@ -77,6 +77,11 @@ class Test extends React.Component {
                   strokeColor="#000"
                   strokeWidth={2}
                 />
+
+                <Marker
+                  coordinate={data.locationArr[0]}
+                  title={"開始"}
+                />
               </MapView>
               <View style={{ marginLeft: 5 }}>
                 <Text style={localStyles.Text}>{`日期: ${data.date}    總時間: ${data.totalTime}`}</Text>
@@ -88,6 +93,7 @@ class Test extends React.Component {
             </View>
 
           ))
+          
           :
 
           <View style={[localStyles.emptyTextContainer]}>

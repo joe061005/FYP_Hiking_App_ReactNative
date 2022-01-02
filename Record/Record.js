@@ -26,6 +26,7 @@ import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from 'expo-location';
 import DateTimerPicker from '@react-native-community/datetimepicker'
 import { Card } from 'react-native-paper'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 
 
@@ -53,7 +54,10 @@ class RecordList extends React.Component {
       contacts: [],
       contactOpen: false,
       contactValue: [],
-      contactItem: [],
+      sendEmail: false,
+      spinner: false,
+      clear: false,
+      clearSend: true,
 
     }
     this.startTimer = this.startTimer.bind(this)
@@ -75,14 +79,16 @@ class RecordList extends React.Component {
   componentDidMount() {
     this.getuserInfo()
     this.getContact()
+
   }
 
-  startTimer() {
+  async startTimer() {
     let twoMin = false;
     this.setState({ isStart: true })
     const Timer = setInterval(() => {
       if (this.state.isStop) {
         clearInterval(Timer)
+        this.setState({ clear: true })
         return;
       }
       let Sec = this.state.second;
@@ -120,22 +126,29 @@ class RecordList extends React.Component {
   }
 
   async resetTimer() {
-    const date = new Date();
-    const record = {
-      locationArr: this.state.userLocation,
-      totalTime: `${this.state.hour < 10 ? '0' + this.state.hour : this.state.hour}:${this.state.minute < 10 ? '0' + this.state.minute : this.state.minute}:${this.state.second < 10 ? '0' + this.state.second : this.state.second}`,
-      date: date.getDate() + '-' + (date.getMonth() + 1) + "-" + date.getFullYear()
+    console.log("RESETTIMER(): ", this.state.userLocation)
+    if (this.state.userLocation.length > 0) {
+      const date = new Date();
+      const record = {
+        locationArr: this.state.userLocation,
+        totalTime: `${this.state.hour < 10 ? '0' + this.state.hour : this.state.hour}:${this.state.minute < 10 ? '0' + this.state.minute : this.state.minute}:${this.state.second < 10 ? '0' + this.state.second : this.state.second}`,
+        date: date.getDate() + '-' + (date.getMonth() + 1) + "-" + date.getFullYear()
+      }
+      await API.storeRecord(record)
+
     }
-    await API.storeRecord(record)
-    this.setState({ isStop: false, isStart: false })
-    this.setState({ second: 0, minute: 0, hour: 0 })
     this.setState({ userLocation: [] })
+    this.setState({ second: 0, minute: 0, hour: 0 })
+    this.setState({ isStop: false, isStart: false })
+
   }
 
+
   async recordUserLocation() {
+    this.setState({ spinner: true })
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('提示', '你需要提供授權才可以使用此功能', [{ text: '確定', onPress: () => { } }])
+      Alert.alert('提示', '你需要提供授權才可以使用此功能', [{ text: '確定', onPress: () => { this.setState({ spinner: false }) } }])
       return;
     }
 
@@ -145,6 +158,7 @@ class RecordList extends React.Component {
     this.setState(({ userLocation }) => ({
       userLocation: [...userLocation, locationObj]
     }))
+    this.setState({ spinner: false })
 
     console.log("LOCATIONARRAY: ", this.state.userLocation)
 
@@ -152,7 +166,12 @@ class RecordList extends React.Component {
 
   checkForm() {
     if (!this.state.trailName) {
-      this.Message('你需要輸入所有資料')
+      this.Message('你需要輸入路線名稱')
+      return false
+    }
+
+    if (this.state.contactValue.length == 0) {
+      this.Message('你需要選擇聯絡人')
       return false
     }
 
@@ -181,10 +200,49 @@ class RecordList extends React.Component {
     this.setState({ modal: false })
     this.setState({ startSending: true })
 
+    this.sendUserLocation();
+
+    var datetime = new Date(this.state.endDate.getFullYear(), this.state.endDate.getMonth(), this.state.endDate.getDate(),
+    this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
+
+    const Send = setInterval(() => {
+      if (!this.state.startSending) {
+        clearInterval(Send)
+        return;
+      }
+      this.setState({ sendEmail: true })
+    }, 60000)
+
+    const check = setInterval(() => {
+      if (!this.state.startSending) {
+        clearInterval(check)
+        this.setState({ clearSend: true })
+        return;
+      }
+      NetInfo.fetch().then(state => {
+        if (this.state.sendEmail && state.isConnected) {
+          console.log("send email!")
+          this.sendUserLocation()
+          this.setState({ sendEmail: false })
+        }
+
+        if(new Date().getTime() > datetime.getTime() && state.isConnected){
+          this.sendUserLocation(true)
+          this.setState({ startSending: false })
+          this.Message('由於己完成遠足旅程，安全出遊模式將會停止')
+        }
+      });
+
+
+      
+    }, 1000)
+
+
+
 
   }
 
-  async sendUserLocation() {
+  async sendUserLocation(finish = false) {
 
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
@@ -194,22 +252,35 @@ class RecordList extends React.Component {
 
     let location = await Location.getCurrentPositionAsync({});
 
+    const ContactList = this.state.contacts.filter((data, index) => {
+      return this.state.contactValue.includes(data.email)
+    })
+
+    console.log("ContactList: ", ContactList)
+
+
     var datetime = new Date(this.state.endDate.getFullYear(), this.state.endDate.getMonth(), this.state.endDate.getDate(),
       this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
 
-    const props = {
-      email: this.state.email,
-      username: this.state.data.username,
-      contactName: this.state.name,
-      location: { latitude: location.coords.latitude, longitude: location.coords.longitude },
-      trailName: this.state.trailName,
-      time: datetime
-    }
 
-    await API.sendUserLocation(props).then(([code, data, header]) => {
-      if (code == '200') {
-        console.log('SENT')
+    ContactList.map(async (data, index) => {
+
+      const props =
+      {
+        email: data.email,
+        username: this.state.data.username,
+        contactName: data.username,
+        location: { latitude: location.coords.latitude, longitude: location.coords.longitude },
+        trailName: this.state.trailName,
+        time: datetime
       }
+
+      await API.sendUserLocation(props,finish).then(([code, data, header]) => {
+        if (code == '200') {
+          console.log('SENT')
+        }
+      })
+
     })
 
   }
@@ -222,11 +293,13 @@ class RecordList extends React.Component {
 
   async stop() {
     this.setState({ startSending: false })
+    this.Message('己停止安全出遊模式')
   }
 
   async getContact() {
     const contacts = await API.getContact();
     contacts && this.setState({ contacts })
+    console.log("CONTACTS: ", contacts)
   }
 
   async addContact() {
@@ -247,7 +320,7 @@ class RecordList extends React.Component {
     }
     await API.addContact(record)
     this.setState({ addContact: false })
-    this.setState({ username: '', email: '' })
+    this.setState({ name: '', email: '' })
     await this.getContact()
     this.Message('己增加聯絡人')
   }
@@ -257,6 +330,8 @@ class RecordList extends React.Component {
       this.setState(({ contacts }) => ({
         contacts: [...contacts.slice(0, index), ...contacts.slice(index + 1)]
       }))
+      await this.getContact()
+      this.setState({ contactValue: [] })
     }
   }
 
@@ -276,14 +351,19 @@ class RecordList extends React.Component {
   render() {
     return (
       <View style={localStyles.container}>
+        <Spinner
+          visible={this.state.spinner}
+          textContent={'正在獲取用戶位置'}
+          textStyle={{ color: 'white' }}
+        />
         {!this.state.modal ?
           <MapView
             style={localStyles.MapView}
             region={{
               latitude: this.state.userLocation.length > 0 ? this.state.userLocation[this.state.userLocation.length - 1].latitude : 22.29258,
               longitude: this.state.userLocation.length > 0 ? this.state.userLocation[this.state.userLocation.length - 1].longitude : 114.18247,
-              latitudeDelta: this.state.userLocation.length > 0 ? 0.0035 : 0.2222,
-              longitudeDelta: this.state.userLocation.length > 0 ? 0.0035 : 0.2221
+              latitudeDelta: this.state.userLocation.length > 0 ? 0.0025 : 0.2222,
+              longitudeDelta: this.state.userLocation.length > 0 ? 0.0025 : 0.2221
 
             }}
             showsUserLocation={true}
@@ -314,7 +394,11 @@ class RecordList extends React.Component {
           : null
         }
         {!this.state.isStart && !this.state.isStop ?
-          <TouchableOpacity style={localStyles.startButtonContainer} onPress={() => { this.startTimer(); this.recordUserLocation(); }}>
+          <TouchableOpacity style={localStyles.startButtonContainer} onPress={async () => {
+            this.setState({ userLocation: [] })
+            await this.recordUserLocation();
+            this.startTimer()
+          }}>
             <AntDesign name="caretright" size={24} color="white" />
           </TouchableOpacity>
           : null
@@ -327,10 +411,10 @@ class RecordList extends React.Component {
         }
         {this.state.isStart && this.state.isStop ?
           <>
-            <TouchableOpacity style={[localStyles.startButtonContainer, { left: Dimensions.get('window').width * 0.35 }]} onPress={() => { this.resetTimer() }}>
+            <TouchableOpacity style={[localStyles.startButtonContainer, { left: Dimensions.get('window').width * 0.35 }]} onPress={() => { if (this.state.clear) { this.resetTimer(); this.setState({ clear: false }) } }}>
               <Ionicons name="stop" size={24} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity style={[localStyles.startButtonContainer, { left: Dimensions.get('window').width * 0.55 }]} onPress={() => { this.setState({ isStop: false }); this.startTimer() }}>
+            <TouchableOpacity style={[localStyles.startButtonContainer, { left: Dimensions.get('window').width * 0.55 }]} onPress={() => { if (this.state.clear) { this.setState({ isStop: false }); this.setState({ clear: false }); this.startTimer() } }}>
               <AntDesign name="caretright" size={24} color="white" />
             </TouchableOpacity>
           </>
@@ -354,210 +438,233 @@ class RecordList extends React.Component {
             this.setState({ modal: false })
           }}
         >
-          <ScrollView style={localStyles.ModalContainer}>
-            <View style={localStyles.filterContainer}>
-              <View style={localStyles.TitleBarContainer}>
-                <View>
-                  <TouchableOpacity onPress={() => { this.setState({ modal: false }) }}>
-                    <AntDesign name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-                <View>
-                  <Text style={{ fontSize: 22, fontWeight: 'bold' }}>安全出遊</Text>
-                </View>
-                <View>
-                  {!this.state.startSending ?
-                    < TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { this.start() }}>
-                      <Text style={{ fontSize: 18, marginLeft: 5 }}>啓用</Text>
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"} keyboardVerticalOffset={Platform.OS == 'ios' ? 0 : -300}>
+            <ScrollView style={localStyles.ModalContainer}>
+              <View style={localStyles.filterContainer}>
+                <View style={localStyles.TitleBarContainer}>
+                  <View>
+                    <TouchableOpacity onPress={() => { this.setState({ modal: false }) }}>
+                      <AntDesign name="close" size={24} color="black" />
                     </TouchableOpacity>
-                    :
-                    <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { this.stop() }}>
-                      <Text style={{ fontSize: 18, marginLeft: 5, color: 'red' }}>停止</Text>
-                    </TouchableOpacity>
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 22, fontWeight: 'bold' }}>安全出遊</Text>
+                  </View>
+                  <View>
+                    {!this.state.startSending ?
+                      < TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { if (this.state.clearSend) { this.start(); this.setState({ clearSend: false }) } }}>
+                        <Text style={{ fontSize: 18, marginLeft: 5 }}>啓用</Text>
+                      </TouchableOpacity>
+                      :
+                      <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { this.stop() }}>
+                        <Text style={{ fontSize: 18, marginLeft: 5, color: 'red' }}>停止</Text>
+                      </TouchableOpacity>
 
-                  }
+                    }
+                  </View>
                 </View>
-              </View>
 
-              <View style={{ marginTop: 15 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>此功能可以讓你的聯絡人知道你所在的位置，以確保遠足安全。在有網絡的情況下，系統會每十分鐘發送電郵給你的聯絡人。</Text>
-              </View>
+                <View style={{ marginTop: 15 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>此功能可以讓你的聯絡人知道你所在的位置，以確保遠足安全。在有網絡的情況下，系統會每十分鐘發送電郵給你的聯絡人。</Text>
+                </View>
 
-              <Text style={localStyles.titleTextStyle}>預計結束日期</Text>
-              <View pointerEvents={this.state.startSending ? 'none' : 'auto'}>
-                <DateTimerPicker
-                  value={this.state.endDate}
-                  mode="date"
-                  display="calendar"
-                  onChange={(event, endDate) => { this.setState({ endDate }) }}
-                  style={{ height: 50 }}
-                />
-              </View>
-              <Text style={localStyles.titleTextStyle}>預計結束時間</Text>
-              <View pointerEvents={this.state.startSending ? 'none' : 'auto'}>
-                <DateTimerPicker
-                  value={this.state.endTime}
-                  mode="time"
-                  display="clock"
-                  onChange={(event, endTime) => { this.setState({ endTime }) }}
-                  style={{ height: 50 }}
-                />
-              </View>
+                <Text style={localStyles.titleTextStyle}>預計結束日期</Text>
+                <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
+                  <DateTimerPicker
+                    value={this.state.endDate}
+                    mode="date"
+                    display="calendar"
+                    onChange={(event, endDate) => { this.setState({ endDate }) }}
+                    style={{ height: 50 }}
+                  />
+                </View>
+                <Text style={localStyles.titleTextStyle}>預計結束時間</Text>
+                <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
+                  <DateTimerPicker
+                    value={this.state.endTime}
+                    mode="time"
+                    display="clock"
+                    onChange={(event, endTime) => { this.setState({ endTime }) }}
+                    style={{ height: 50 }}
+                  />
+                </View>
 
-              <Text style={localStyles.titleTextStyle}>遠足路線名稱</Text>
-              <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
-                <TextInput
-                  style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
-                  value={this.state.trailName}
-                  autoCorrect={false}
-                  autoCapitalize='none'
-                  underlineColorAndroid='transparent'
-                  placeholder='遠足路線名稱'
-                  onChangeText={(trailName) => this.setState({ trailName })}
-                  selectTextOnFocus={true}
-                />
-              </View>
+                <Text style={localStyles.titleTextStyle}>遠足路線名稱</Text>
+                <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
+                  <TextInput
+                    style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
+                    value={this.state.trailName}
+                    autoCorrect={false}
+                    autoCapitalize='none'
+                    underlineColorAndroid='transparent'
+                    placeholder='遠足路線名稱'
+                    onChangeText={(trailName) => this.setState({ trailName })}
+                    selectTextOnFocus={true}
+                  />
+                </View>
 
-              <View style={{marginTop: 20}}>
-                <Text style={[localStyles.titleTextStyle, { marginTop: 0 }]}>聯絡人(你可以選擇最多三個)</Text>
-              </View>
-              <View style={localStyles.ContactView}>
-                <TouchableOpacity style={localStyles.manageContactsButton} onPress={() => { this.setState({ addContact: true, deleteContact: false }) }}>
-                  <Text style={localStyles.ContactButtonText}>新增聯絡人</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={localStyles.manageContactsButton} onPress={() => { this.setState({ deleteContact: true, addContact: false }) }}>
-                  <Text style={localStyles.ContactButtonText}>刪除聯絡人</Text>
-                </TouchableOpacity>
-
-              </View>
-              {!this.state.addContact && !this.state.deleteContact ?
-                <DropDown
-                  open={this.state.contactOpen}
-                  value={this.state.contactValue}
-                  items={this.state.contactItem}
-                  setOpen={this.setContactOpen}
-                  setValue={this.setContactValue}
-                  onChangeValue={(value) => {
-                    console.log("value", value);
-                  }}
-                  style={localStyles.dropdown}
-                  placeholder="聯絡人"
-                  placeholderStyle={localStyles.dropdownText}
-                  zIndex={3000}
-                  zIndexInverse={1000}
-                  textStyle={localStyles.dropdownText}
-                  dropDownContainerStyle={localStyles.dropdownContainer}
-                  listMode="SCROLLVIEW"
-                  scrollViewProps={{
-                    persistentScrollbar: true
-                  }}
-                  listItemContainerStyle={localStyles.itemContainer}
-                  multiple={true}
-                  min={0}
-                  mode="BADGE"
-                />
-                :
-                null
-              }
-              {this.state.addContact ?
-                <>
-                  <Text style={localStyles.titleTextStyle}>聯絡人的名稱</Text>
-                  <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
-                    <TextInput
-                      style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
-                      value={this.state.name}
-                      autoCorrect={false}
-                      autoCapitalize='none'
-                      underlineColorAndroid='transparent'
-                      placeholder='聯絡人的名稱'
-                      onChangeText={(name) => this.setState({ name })}
-                      selectTextOnFocus={true}
-
-                    />
-                  </View>
-
-                  <Text style={localStyles.titleTextStyle}>聯絡人的電郵地址</Text>
-                  <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
-                    <TextInput
-                      style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
-                      value={this.state.email}
-                      autoCorrect={false}
-                      autoCapitalize='none'
-                      underlineColorAndroid='transparent'
-                      placeholder='聯絡人的電郵地址'
-                      onChangeText={(email) => this.setState({ email })}
-                      selectTextOnFocus={true}
-                    />
-                  </View>
-                  <TouchableOpacity style={localStyles.addUserButton} onPress={() => { this.addContact() }}>
-                    <Ionicons name="person-add" size={20} color="white" />
-                    <Text style={localStyles.addUserButtonText}>新增聯絡人</Text>
+                <View style={{ marginTop: 20 }}>
+                  <Text style={[localStyles.titleTextStyle, { marginTop: 0 }]}>聯絡人(你可以選擇最多三個)</Text>
+                </View>
+                <View style={localStyles.ContactView} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
+                  <TouchableOpacity style={localStyles.manageContactsButton} onPress={() => { this.setState({ addContact: true, deleteContact: false }) }}>
+                    <Text style={localStyles.ContactButtonText}>新增聯絡人</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={localStyles.manageContactsButton} onPress={() => { this.setState({ deleteContact: true, addContact: false }) }}>
+                    <Text style={localStyles.ContactButtonText}>刪除聯絡人</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ addContact: false }) }}>
-                    <MaterialIcons name="cancel" size={20} color="white" />
-                    <Text style={localStyles.addUserButtonText}>取消</Text>
-                  </TouchableOpacity>
-                </>
-                :
-                null
-              }
-              {this.state.deleteContact ?
-                this.state.contacts.length > 0 ?
-                  <>
-                    {this.state.contacts.map((data, index) => (
-
-                      <Card
-                        style={localStyles.CardStyle}
-                        key={index}
-                      >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                          <View style={{ flexDirection: 'column' }}>
-                            <Text style={localStyles.DeleteContactText}>名稱： {data.username}</Text>
-                            <Text style={localStyles.DeleteContactText}>電郵： {data.email}</Text>
-                          </View>
-                          <TouchableOpacity onPress={() => { }} style={{ marginTop: 15 }}>
-                            <AntDesign name="deleteuser" size={28} color="red" />
-                          </TouchableOpacity>
+                </View>
+                {!this.state.addContact && !this.state.deleteContact ?
+                  <View pointerEvents={this.state.startSending ? 'none' : 'auto'}>
+                    <DropDown
+                      schema={{
+                        label: 'username',
+                        value: 'email'
+                      }}
+                      open={this.state.contactOpen}
+                      value={this.state.contactValue}
+                      items={this.state.contacts}
+                      setOpen={this.setContactOpen}
+                      setValue={this.setContactValue}
+                      onChangeValue={(value) => {
+                        console.log("value", value);
+                      }}
+                      style={localStyles.dropdown}
+                      placeholder="聯絡人"
+                      placeholderStyle={localStyles.dropdownText}
+                      zIndex={3000}
+                      zIndexInverse={1000}
+                      textStyle={localStyles.dropdownText}
+                      dropDownContainerStyle={localStyles.dropdownContainer}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        persistentScrollbar: true
+                      }}
+                      listItemContainerStyle={localStyles.itemContainer}
+                      multiple={true}
+                      min={0}
+                      max={3}
+                      mode="BADGE"
+                      ListEmptyComponent={({
+                        listMessageContainerStyle, listMessageTextStyle, ActivityIndicatorComponent, loading, message
+                      }) => (
+                        <View style={listMessageContainerStyle}>
+                          {loading ? (
+                            <ActivityIndicatorComponent />
+                          ) : (
+                            <Text style={listMessageTextStyle}>
+                              沒有聯絡人
+                            </Text>
+                          )}
                         </View>
-                      </Card>
+                      )}
+                    />
+                  </View>
+                  :
+                  null
+                }
+                {this.state.addContact ?
+                  <>
+                    <Text style={localStyles.titleTextStyle}>聯絡人的名稱</Text>
+                    <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
+                      <TextInput
+                        style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
+                        value={this.state.name}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                        underlineColorAndroid='transparent'
+                        placeholder='聯絡人的名稱'
+                        onChangeText={(name) => this.setState({ name })}
+                        selectTextOnFocus={true}
 
-                    ))}
-                    <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ deleteContact: false }) }}>
+                      />
+                    </View>
+
+                    <Text style={localStyles.titleTextStyle}>聯絡人的電郵地址</Text>
+                    <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
+                      <TextInput
+                        style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
+                        value={this.state.email}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                        underlineColorAndroid='transparent'
+                        placeholder='聯絡人的電郵地址'
+                        onChangeText={(email) => this.setState({ email })}
+                        selectTextOnFocus={true}
+                      />
+                    </View>
+                    <TouchableOpacity style={localStyles.addUserButton} onPress={() => { this.addContact() }}>
+                      <Ionicons name="person-add" size={20} color="white" />
+                      <Text style={localStyles.addUserButtonText}>新增聯絡人</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ addContact: false }) }}>
                       <MaterialIcons name="cancel" size={20} color="white" />
                       <Text style={localStyles.addUserButtonText}>取消</Text>
                     </TouchableOpacity>
-
                   </>
                   :
-                  <>
-                    <View style={[localStyles.emptyTextContainer]}>
-                      <View style={[localStyles.emptyContent]}>
-                        <Text style={[localStyles.emptyText, localStyles.textCenter]}>
-                          沒有聯絡人
-                        </Text>
+                  null
+                }
+                {this.state.deleteContact ?
+                  this.state.contacts.length > 0 ?
+                    <>
+                      {this.state.contacts.map((data, index) => (
 
+                        <Card
+                          style={localStyles.CardStyle}
+                          key={index}
+                        >
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'column' }}>
+                              <Text style={localStyles.DeleteContactText}>名稱： {data.username}</Text>
+                              <Text style={localStyles.DeleteContactText}>電郵： {data.email}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => { Alert.alert('提示', '你確定要刪除此聯絡人嗎?', [{ text: '確定', onPress: () => { this.deleteContact(index) } }, { text: '取消' }]) }} style={{ marginTop: 15 }}>
+                              <AntDesign name="deleteuser" size={28} color="red" />
+                            </TouchableOpacity>
+                          </View>
+                        </Card>
+
+                      ))}
+                      <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ deleteContact: false }) }}>
+                        <MaterialIcons name="cancel" size={20} color="white" />
+                        <Text style={localStyles.addUserButtonText}>取消</Text>
+                      </TouchableOpacity>
+
+                    </>
+                    :
+                    <>
+                      <View style={[localStyles.emptyTextContainer]}>
+                        <View style={[localStyles.emptyContent]}>
+                          <Text style={[localStyles.emptyText, localStyles.textCenter]}>
+                            沒有聯絡人
+                          </Text>
+
+                        </View>
                       </View>
-                    </View>
-                    <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ deleteContact: false }) }}>
-                      <MaterialIcons name="cancel" size={20} color="white" />
-                      <Text style={localStyles.addUserButtonText}>取消</Text>
-                    </TouchableOpacity>
-                  </>
+                      <TouchableOpacity style={[localStyles.addUserButton, { backgroundColor: '#f8344c' }]} onPress={() => { this.setState({ deleteContact: false }) }}>
+                        <MaterialIcons name="cancel" size={20} color="white" />
+                        <Text style={localStyles.addUserButtonText}>取消</Text>
+                      </TouchableOpacity>
+                    </>
 
-                :
-                null
+                  :
+                  null
 
-              }
+                }
 
 
-            </View>
+              </View>
 
-          </ScrollView>
+            </ScrollView>
+          </KeyboardAvoidingView>
 
 
         </Modal>
       </View >
+
     )
   }
 }
@@ -732,7 +839,7 @@ const localStyles = StyleSheet.create({
   dropdownContainer: {
     borderColor: 'rgba(45, 74, 105, 1)',
     width: '100%',
-    marginTop: 20,
+    marginTop: 10,
   },
   dropdownText: {
     color: 'rgba(45, 74, 105, 1)',
