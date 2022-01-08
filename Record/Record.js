@@ -19,7 +19,7 @@ import {
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
-import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons"
+import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons, Foundation } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
 import DropDown from "react-native-dropdown-picker";
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -203,7 +203,7 @@ class RecordList extends React.Component {
     this.sendUserLocation();
 
     var datetime = new Date(this.state.endDate.getFullYear(), this.state.endDate.getMonth(), this.state.endDate.getDate(),
-    this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
+      this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
 
     const Send = setInterval(() => {
       if (!this.state.startSending) {
@@ -211,7 +211,7 @@ class RecordList extends React.Component {
         return;
       }
       this.setState({ sendEmail: true })
-    }, 60000)
+    }, 600000)
 
     const check = setInterval(() => {
       if (!this.state.startSending) {
@@ -226,7 +226,7 @@ class RecordList extends React.Component {
           this.setState({ sendEmail: false })
         }
 
-        if(new Date().getTime() > datetime.getTime() && state.isConnected){
+        if (new Date().getTime() > datetime.getTime() && state.isConnected) {
           this.sendUserLocation(true)
           this.setState({ startSending: false })
           this.Message('由於己完成遠足旅程，安全出遊模式將會停止')
@@ -234,7 +234,7 @@ class RecordList extends React.Component {
       });
 
 
-      
+
     }, 1000)
 
 
@@ -275,7 +275,7 @@ class RecordList extends React.Component {
         time: datetime
       }
 
-      await API.sendUserLocation(props,finish).then(([code, data, header]) => {
+      await API.sendUserLocation(props, finish).then(([code, data, header]) => {
         if (code == '200') {
           console.log('SENT')
         }
@@ -464,11 +464,14 @@ class RecordList extends React.Component {
                   </View>
                 </View>
 
-                <View style={{ marginTop: 15 }}>
-                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>此功能可以讓你的聯絡人知道你所在的位置，以確保遠足安全。在有網絡的情況下，系統會每十分鐘發送電郵給你的聯絡人。</Text>
+                <View style={{ marginTop: 25 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>此功能可以讓你的聯絡人知道你所在的位置，以確保安全。在有網絡的情況下，系統會每十分鐘發送電郵給你的聯絡人。</Text>
                 </View>
 
-                <Text style={localStyles.titleTextStyle}>預計結束日期</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <MaterialIcons name="date-range" size={24} color="black" style={localStyles.iconStyle} />
+                  <Text style={localStyles.titleTextStyle}>預計結束日期</Text>
+                </View>
                 <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
                   <DateTimerPicker
                     value={this.state.endDate}
@@ -478,7 +481,11 @@ class RecordList extends React.Component {
                     style={{ height: 50 }}
                   />
                 </View>
-                <Text style={localStyles.titleTextStyle}>預計結束時間</Text>
+
+                <View style={{ flexDirection: 'row' }}>
+                  <Ionicons name="time-outline" size={24} color="black" style={localStyles.iconStyle} />
+                  <Text style={localStyles.titleTextStyle}>預計結束時間</Text>
+                </View>
                 <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
                   <DateTimerPicker
                     value={this.state.endTime}
@@ -489,7 +496,10 @@ class RecordList extends React.Component {
                   />
                 </View>
 
-                <Text style={localStyles.titleTextStyle}>遠足路線名稱</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <Foundation name="mountains" size={24} color="black" style={localStyles.iconStyle} />
+                  <Text style={localStyles.titleTextStyle}>遠足路線名稱</Text>
+                </View>
                 <View style={localStyles.inputFieldContainer} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
                   <TextInput
                     style={{ flex: 1, fontSize: 18, textAlignVertical: 'center' }}
@@ -503,9 +513,11 @@ class RecordList extends React.Component {
                   />
                 </View>
 
-                <View style={{ marginTop: 20 }}>
-                  <Text style={[localStyles.titleTextStyle, { marginTop: 0 }]}>聯絡人(你可以選擇最多三個)</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <Ionicons name="people-sharp" size={24} color="black" style={localStyles.iconStyle} />
+                  <Text style={[localStyles.titleTextStyle]}>聯絡人(你可以選擇最多三個)</Text>
                 </View>
+
                 <View style={localStyles.ContactView} pointerEvents={this.state.startSending ? 'none' : 'auto'}>
                   <TouchableOpacity style={localStyles.manageContactsButton} onPress={() => { this.setState({ addContact: true, deleteContact: false }) }}>
                     <Text style={localStyles.ContactButtonText}>新增聯絡人</Text>
@@ -850,6 +862,10 @@ const localStyles = StyleSheet.create({
     borderColor: 'rgba(45, 74, 105, 1)',
     height: 55
   },
+  iconStyle: {
+    marginTop: 20,
+    marginRight: 2
+  }
 
 
 

@@ -155,6 +155,18 @@ const HomeNavigator = ({ navigation, route }) => {
                 })}
             />
 
+            <InfoStack.Screen
+                name="InfoDetail"
+                component={InfoDetailComponent}
+                options={{
+                    title: "資訊詳情",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
+
+            />
+
         </HomeStack.Navigator>
     )
 }

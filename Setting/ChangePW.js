@@ -17,7 +17,8 @@ import {
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
-import { MaterialIcons, Entypo, AntDesign, FontAwesome ,FontAwesome5} from "@expo/vector-icons"
+import { MaterialIcons, Entypo, AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons"
+import Spinner from 'react-native-loading-spinner-overlay'
 
 
 class ChangePW extends React.Component {
@@ -27,6 +28,7 @@ class ChangePW extends React.Component {
             currentPassword: '',
             changedPassword: '',
             confirmPassword: '',
+            spinner: false,
 
         }
         this.changePassword = this.changePassword.bind(this)
@@ -35,42 +37,51 @@ class ChangePW extends React.Component {
 
     }
 
-    componentDidMount(){
-      //  console.log('params: ', this.props.route)
+    componentDidMount() {
+        //  console.log('params: ', this.props.route)
     }
 
     Message(msg) {
         Alert.alert('錯誤', msg, [{ text: '確定' }])
     }
 
-    checking(){
-      if(!this.state.currentPassword || !this.state.changedPassword || !this.state.confirmPassword){
-          this.Message('請輸入所有資料')
-      }else if (!(this.state.changedPassword == this.state.confirmPassword)){
-        this.Message('密碼不相同')
-      }else if (this.state.changedPassword == this.state.currentPassword){
-        this.Message('新密碼與現在的密碼相同')
-      }
-      else {
-          this.changePassword()
-      }
+    async checking() {
+        if (!this.state.currentPassword || !this.state.changedPassword || !this.state.confirmPassword) {
+            this.Message('請輸入所有資料')
+        } else if (!(this.state.changedPassword == this.state.confirmPassword)) {
+            this.Message('密碼不相同')
+        } else if (this.state.changedPassword == this.state.currentPassword) {
+            this.Message('新密碼與現在的密碼相同')
+        }
+        else {
+            this.setState({ spinner: true })
+            await this.changePassword()
+        }
     }
 
-    changePassword() {
+    async changePassword() {
         var params = {
             username: this.props.route.params.username,
             oldPassword: this.state.currentPassword,
             newPassword: this.state.changedPassword
 
-          }
-      
-          API.changeCurrentPassword(params).then(([code, data, header]) => {
+        }
+
+        API.changeCurrentPassword(params).then(([code, data, header]) => {
             if (code == '401') {
-              this.Message('密碼錯誤')
+                this.setState({ spinner: false })
+                setTimeout(() => {
+                    this.Message('密碼錯誤')
+                }, 200)
+                
             } else {
-              Alert.alert('提示', '成功更改密碼', [{ text: '確定', onPress: () => {this.props.navigation.goBack()} }])
+                this.setState({ spinner: false })
+                setTimeout(() => {
+                    Alert.alert('提示', '成功更改密碼', [{ text: '確定', onPress: () => { this.props.navigation.goBack() } }])
+                }, 200)
+
             }
-          })
+        })
     }
 
 
@@ -78,6 +89,11 @@ class ChangePW extends React.Component {
 
         return (
             <View style={localStyles.Container}>
+                <Spinner
+                    visible={this.state.spinner}
+                    textContent={'正在更改密碼'}
+                    textStyle={{ color: 'white' }}
+                />
                 <View style={localStyles.formContainer}>
                     <Text style={localStyles.titleTextStyle}>現在的密碼</Text>
                     <View style={localStyles.inputFieldContainer}>
@@ -124,7 +140,7 @@ class ChangePW extends React.Component {
                         />
                     </View>
 
-                    <TouchableOpacity onPress={ () => { this.checking() }}>
+                    <TouchableOpacity onPress={() => { this.checking() }}>
                         <View style={[localStyles.buttonContainer]}>
                             <View style={[localStyles.addButton, { width: '90%', backgroundColor: '#009dff' }]}>
                                 <FontAwesome5 style={[localStyles.buttonIcon]} name="unlock-alt" size={24} color="white" />
@@ -133,7 +149,7 @@ class ChangePW extends React.Component {
                         </View>
                     </TouchableOpacity>
 
-                    <Text style={[localStyles.titleTextStyle, {margin: 40, color: 'red'}]}>*如果忘記密碼，請登出並使用忘記密碼功能來重設密碼*</Text>
+                    <Text style={[localStyles.titleTextStyle, { margin: 40, color: 'red' }]}>*如果忘記密碼，請登出並使用忘記密碼功能來重設密碼*</Text>
 
                 </View>
 

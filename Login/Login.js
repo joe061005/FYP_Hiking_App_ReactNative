@@ -173,6 +173,7 @@ class Login extends React.Component {
   }
 
   isValidLoginInput() {
+    this.setState({approvedInput: true})
     this.setState({ validInput: this.state.user_name && this.state.password })
     return (this.state.user_name && this.state.password)
   }
