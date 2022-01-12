@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://18b2-223-19-143-35.ngrok.io/'
+    baseURL: 'https://a0fe-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -304,7 +304,7 @@ var api = {
     },
 
     // match page
-    getMatchForm: async() => {
+    getMatchForm: () => {
         var request = {
             method: 'match/getMatchForm'
         }
@@ -312,8 +312,17 @@ var api = {
         return get(request)
     },
 
+    submitMatchForm: (props) => {
+        var request = {
+            method: 'match/submitMatchForm',
+            params: props
+        }
+
+        return post(request)
+    },
+
     // setting page
-    logout: async () => {
+    logout:  () => {
         var request = {
             method: 'user/logout'
         }

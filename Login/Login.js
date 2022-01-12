@@ -788,6 +788,7 @@ class Login extends React.Component {
                     { label: "登入", value: "login" },
                     { label: "註冊", value: "register" }
                   ]}
+                  fontSize={20}
                 />
                 {this.state.page == "login" ?
                   member_login
