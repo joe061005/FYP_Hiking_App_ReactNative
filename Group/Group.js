@@ -19,7 +19,7 @@ import {
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
-import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons, Feather, FontAwesome } from "@expo/vector-icons"
+import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons, Feather, FontAwesome, FontAwesome5 } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
 import DropDown from "react-native-dropdown-picker";
 import Spinner from 'react-native-loading-spinner-overlay'
@@ -41,20 +41,24 @@ class Group extends React.Component {
       age: '',
       experience: '',
       difficulty: 1,
-      length: 1,
       time: 1,
       view: 1,
       startTime: 'morning',
+      phoneNumber: '',
+      name: '',
+      groupList: []
 
 
     }
     this.getForm = this.getForm.bind(this)
     this.submitData = this.submitData.bind(this)
     this.message = this.message.bind(this)
+    this.getGroup = this.getGroup.bind(this)
   }
 
-  componentDidMount() {
-    this.getForm()
+  async componentDidMount() {
+    await Promise.all([this.getForm(), this.getGroup()])
+
   }
 
   async getForm() {
@@ -71,43 +75,98 @@ class Group extends React.Component {
     })
   }
 
-  message(msg){
-    Alert.alert('注意', msg, [{text: '確定'}])
+  async getGroup() {
+    API.getMatchResult().then(([code, data, header]) => {
+      if (code == '200') {
+        if (data.length > 0) {
+          this.setState({ groupList: data })
+          console.log("groupList: ", this.state.groupList)
+        }
+      }
+    })
   }
 
-  async submitData(){
-    if(!this.state.experience){
+  message(msg) {
+    Alert.alert('注意', msg, [{ text: '確定' }])
+  }
+
+  async submitData() {
+    if (!this.state.experience) {
       this.message('「遠足經驗」一欄為必填！')
       return
-    }else{
-      if(this.state.experience.includes('.')){
+    } else {
+      if (this.state.experience.includes('.')) {
         this.message('遠足經驗必須為整數！')
         return
-      }
-    }
-
-    if(this.state.age){
-      if(this.state.age.includes('.')){
-        this.message('年齡必須為整數！')
+      } else if (this.state.experience.charAt(0) == '0' && this.state.experience.length > 1) {
+        this.message('無效的「遠足經驗」格式！')
         return
       }
     }
 
-    var params = {
-      gender: this.state.gender == 'boy'? 1: 0,
-      age: this.state.age? Number(this.state.age) : 0,
-      experience: Number(this.state.experience),
-      difficulty: Number(this.state.difficulty),
-      length: Number(this.state.length),
-      time: Number(this.state.time),
-      startTime: this.state.startTime == 'morning' ? 0 : this.state.startTime == "noon" ? 1 : 2,
-      view: Number(this.state.view),
+    if (this.state.age) {
+      if (this.state.age.includes('.')) {
+        this.message('年齡必須為整數！')
+        return
+      } else if (this.state.age.charAt(0) == '0') {
+        this.message('無效的年齡格式！')
+        return
+      }
     }
 
+    if (this.state.phoneNumber) {
+      if (this.state.phoneNumber.length != 8) {
+        this.message('無效的電話號碼格式！')
+        return
+      } else if (this.state.phoneNumber.includes('.')) {
+        this.message('無效的電話號碼格式！')
+        return
+      }
+    }
+
+    this.setState({ spinner: true })
+
+    const age = Math.floor(Number(this.state.age) / 10)
+
+    let exp = Number(this.state.experience)
+
+    if (exp == 0) {
+      exp = 2
+    } else if (exp % 2 == 1) {
+      exp = exp + 1
+    }
+
+    let time = Number(this.state.time)
+
+    if (time % 2 == 1) {
+      time = time + 1
+    }
+
+
+
+    var params = {
+      gender: this.state.gender == 'boy' ? 1 : 0,
+      age: this.state.age ? age : -1,
+      experience: exp / 2,
+      difficulty: Number(this.state.difficulty),
+      time: time / 2,
+      startTime: this.state.startTime == 'morning' ? 0 : this.state.startTime == "noon" ? 1 : 2,
+      view: Number(this.state.view),
+      phoneNumber: this.state.phoneNumber
+    }
+
+    console.log("param: ", params)
+
     API.submitMatchForm(params).then(([code, data, header]) => {
-      if(code == '200'){
-        this.setState({showForm: false, formContent: data})
+      if (code == '200') {
+        this.setState({ showForm: false, formContent: data })
+        this.setState({ spinner: false })
         console.log("submitData(): ", this.state.formContent)
+      } else {
+        this.setState({ spinner: false })
+        setTimeout(() => {
+          this.message('伺服器繁忙，請稍候再試')
+        }, 200)
       }
     })
   }
@@ -157,6 +216,20 @@ class Group extends React.Component {
               autoCorrect={false}
               underlineColorAndroid='transparent'
               keyboardType="numeric"
+              maxLength={2}
+            />
+
+            <Text style={localStyles.formText}>電話號碼</Text>
+            <TextInput
+              style={localStyles.textField}
+              onChangeText={(phoneNumber) => this.setState({ phoneNumber })}
+              value={this.state.phoneNumber}
+              placeholder='電話號碼(選填）'
+              autoCapitalize='none'
+              autoCorrect={false}
+              underlineColorAndroid='transparent'
+              keyboardType="numeric"
+              maxLength={8}
             />
 
             <Text style={localStyles.formText}>遠足經驗(年)<Text style={{ color: 'red' }}> *</Text></Text>
@@ -169,9 +242,10 @@ class Group extends React.Component {
               autoCorrect={false}
               underlineColorAndroid='transparent'
               keyboardType="numeric"
+              maxLength={2}
             />
 
-            <Text style={[localStyles.partTitleText, {marginTop: 20}]}>2. 路線資料</Text>
+            <Text style={[localStyles.partTitleText, { marginTop: 20 }]}>2. 路線資料</Text>
 
             <Text style={localStyles.formText}>路線難度  (1為最低，5為最高)<Text style={{ color: 'red' }}> *</Text></Text>
             <NumericInput
@@ -179,16 +253,6 @@ class Group extends React.Component {
               minValue={1}
               maxValue={5}
               value={this.state.difficulty}
-              borderColor={'rgba(45, 74, 105, 1)'}
-              containerStyle={localStyles.numericInput}
-            />
-
-            <Text style={localStyles.formText}>路線長度  (1-30公里)<Text style={{ color: 'red' }}> *</Text></Text>
-            <NumericInput
-              onChange={(length) => this.setState({ length })}
-              minValue={1}
-              maxValue={30}
-              value={this.state.length}
               borderColor={'rgba(45, 74, 105, 1)'}
               containerStyle={localStyles.numericInput}
             />
@@ -247,14 +311,27 @@ class Group extends React.Component {
 
       </ImageBackground>
     )
+
+    const processing = (
+      <View style={[localStyles.Container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <FontAwesome5 name="exclamation-triangle" size={50} color="#f6e146" />
+        <Text style={{ fontSize: 25, fontWeight: 'bold', marginTop: 20 }}>正在進行配對，請耐心等候！</Text>
+        <TouchableOpacity style={{ marginTop: 30 }} onPress={() => { this.getGroup() }}>
+          <Ionicons name="reload" size={35} color="black" />
+        </TouchableOpacity>
+      </View>
+    )
     return this.state.dataFetched ? (
       this.state.showForm ?
         Form
         :
-        (<View style={localStyles.Container}>
-          <Text>Have form</Text>
-        </View>
-        )
+        this.state.groupList.length > 0 ?
+          (<View style={localStyles.Container}>
+            <Text>Have for</Text>
+          </View>
+          )
+          :
+          processing
     )
       :
       (
