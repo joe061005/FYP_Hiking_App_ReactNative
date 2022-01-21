@@ -25,6 +25,7 @@ import DropDown from "react-native-dropdown-picker";
 import Spinner from 'react-native-loading-spinner-overlay'
 import SwitchSelector from "react-native-switch-selector";
 import NumericInput from 'react-native-numeric-input'
+import { Card } from 'react-native-paper'
 
 
 
@@ -36,7 +37,8 @@ class Group extends React.Component {
       showForm: false,
       formContent: [],
       spinner: false,
-      dataFetched: false,
+      FormDataFetched: false,
+      GroupDataFetched: false,
       gender: 'boy',
       age: '',
       experience: '',
@@ -46,7 +48,8 @@ class Group extends React.Component {
       startTime: 'morning',
       phoneNumber: '',
       name: '',
-      groupList: []
+      groupList: [{record: []}],
+      userData: []
 
 
     }
@@ -54,10 +57,11 @@ class Group extends React.Component {
     this.submitData = this.submitData.bind(this)
     this.message = this.message.bind(this)
     this.getGroup = this.getGroup.bind(this)
+    this.getUserInfo = this.getUserInfo.bind(this)
   }
 
   async componentDidMount() {
-    await Promise.all([this.getForm(), this.getGroup()])
+    await Promise.all([this.getForm(), this.getGroup(), this.getUserInfo()])
 
   }
 
@@ -70,7 +74,7 @@ class Group extends React.Component {
         } else {
           this.setState({ showForm: true })
         }
-        this.setState({ dataFetched: true })
+        this.setState({ FormDataFetched: true })
       }
     })
   }
@@ -82,6 +86,7 @@ class Group extends React.Component {
           this.setState({ groupList: data })
           console.log("groupList: ", this.state.groupList)
         }
+        this.setState({ GroupDataFetched: true })
       }
     })
   }
@@ -90,7 +95,18 @@ class Group extends React.Component {
     Alert.alert('注意', msg, [{ text: '確定' }])
   }
 
+  async getUserInfo(){
+    const login_data = await API.userInfo();
+    this.setState({userData: login_data})
+    console.log("userInfo: ", this.state.userData)
+  }
+
   async submitData() {
+    if(!this.state.name){
+      this.message('「稱呼」一欄為必填！')
+      return
+    }
+
     if (!this.state.experience) {
       this.message('「遠足經驗」一欄為必填！')
       return
@@ -152,7 +168,8 @@ class Group extends React.Component {
       time: time / 2,
       startTime: this.state.startTime == 'morning' ? 0 : this.state.startTime == "noon" ? 1 : 2,
       view: Number(this.state.view),
-      phoneNumber: this.state.phoneNumber
+      phoneNumber: this.state.phoneNumber,
+      name: this.state.name
     }
 
     console.log("param: ", params)
@@ -188,6 +205,18 @@ class Group extends React.Component {
             <Text style={localStyles.noticeText}>注意： <Text style={{ color: 'red' }}>*</Text> 為必填</Text>
 
             <Text style={localStyles.partTitleText}>1. 個人資料</Text>
+
+            <Text style={localStyles.formText}>稱呼</Text>
+            <TextInput
+              style={localStyles.textField}
+              onChangeText={(name) => this.setState({ name })}
+              value={this.state.name}
+              placeholder='稱呼'
+              autoCapitalize='none'
+              autoCorrect={false}
+              underlineColorAndroid='transparent'
+              maxLength={10}
+            />
 
             <Text style={localStyles.formText}>性別<Text style={{ color: 'red' }}> *</Text></Text>
             <SwitchSelector
@@ -321,15 +350,39 @@ class Group extends React.Component {
         </TouchableOpacity>
       </View>
     )
-    return this.state.dataFetched ? (
+
+    const showGroup = (
+      <ScrollView style={localStyles.GroupListContainer} contentContainerStyle={{ alignItems: 'center'}}>
+         {this.state.groupList[0].record.map((data,index) => (
+            <Card
+              style={localStyles.CardStyle}
+              key={index}
+            >
+              <View style={localStyles.CardContent}>
+                  <View style={localStyles.genderAndNameContainer}>
+                    {data.gender == 0?<Ionicons name="woman-sharp" size={35} color="#FEC5E5" /> : <Ionicons name="man-sharp" size={35} color="#B1E6EE" /> }
+                    <Text style={localStyles.name}>{data.name}</Text>
+                  </View>
+                  <View style={localStyles.infoContainer}>
+                    <View style={localStyles.detailContainer}>
+
+                    </View>
+                    <View style={localStyles.detailContainer}>
+
+                    </View>
+                  </View>
+              </View>
+
+            </Card>
+         ))}
+      </ScrollView>
+    )
+    return this.state.FormDataFetched && this.state.GroupDataFetched ? (
       this.state.showForm ?
         Form
         :
         this.state.groupList.length > 0 ?
-          (<View style={localStyles.Container}>
-            <Text>Have for</Text>
-          </View>
-          )
+          showGroup
           :
           processing
     )
@@ -346,6 +399,9 @@ const localStyles = StyleSheet.create({
   Container: {
     flex: 1,
     backgroundColor: 'white'
+  },
+  GroupListContainer:{
+    flex: 1,
   },
   BGContainer: {
     flex: 1,
@@ -437,6 +493,36 @@ const localStyles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     alignSelf: 'center'
+  },
+  CardStyle: {
+    width: '90%',
+    height: 100,
+    marginTop: 10,
+    marginBottom: 10
+  },
+  CardContent: {
+    flexDirection: 'row',
+    paddingTop: 15,
+    paddingLeft: 15
+  },
+  genderAndNameContainer: {
+    width: '25%',
+    marginRight: 10,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  name: {
+    fontSize: 18,
+    marginTop: 10
+  },
+  infoContainer: {
+    width: '70%'
+  },
+  detailContainer: {
+    flex: 0.5,
+    flexDirection: 'column',
+    backgroundColor: 'red'
   }
 
 
