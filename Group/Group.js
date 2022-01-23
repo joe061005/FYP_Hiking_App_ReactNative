@@ -35,7 +35,7 @@ class Group extends React.Component {
     super(props);
     this.state = {
       showForm: false,
-      formContent: [],
+      formContent: [{ _id: '' }],
       spinner: false,
       FormDataFetched: false,
       GroupDataFetched: false,
@@ -48,8 +48,7 @@ class Group extends React.Component {
       startTime: 'morning',
       phoneNumber: '',
       name: '',
-      groupList: [{record: []}],
-      userData: []
+      groupList: [{ record: [] }],
 
 
     }
@@ -57,11 +56,10 @@ class Group extends React.Component {
     this.submitData = this.submitData.bind(this)
     this.message = this.message.bind(this)
     this.getGroup = this.getGroup.bind(this)
-    this.getUserInfo = this.getUserInfo.bind(this)
   }
 
   async componentDidMount() {
-    await Promise.all([this.getForm(), this.getGroup(), this.getUserInfo()])
+    await Promise.all([this.getForm(), this.getGroup()])
 
   }
 
@@ -91,18 +89,20 @@ class Group extends React.Component {
     })
   }
 
+  async quitGroup() {
+    API.quitGroup().then(([code, data, header]) => {
+      if (code == '200') {
+        this.setState({ showForm: true, formContent: [{ _id: '' }], groupList: [{ record: [] }] })
+      }
+    })
+  }
+
   message(msg) {
     Alert.alert('注意', msg, [{ text: '確定' }])
   }
 
-  async getUserInfo(){
-    const login_data = await API.userInfo();
-    this.setState({userData: login_data})
-    console.log("userInfo: ", this.state.userData)
-  }
-
   async submitData() {
-    if(!this.state.name){
+    if (!this.state.name) {
       this.message('「稱呼」一欄為必填！')
       return
     }
@@ -176,7 +176,7 @@ class Group extends React.Component {
 
     API.submitMatchForm(params).then(([code, data, header]) => {
       if (code == '200') {
-        this.setState({ showForm: false, formContent: data })
+        this.setState({ showForm: false, formContent: [data] })
         this.setState({ spinner: false })
         console.log("submitData(): ", this.state.formContent)
       } else {
@@ -352,36 +352,57 @@ class Group extends React.Component {
     )
 
     const showGroup = (
-      <ScrollView style={localStyles.GroupListContainer} contentContainerStyle={{ alignItems: 'center'}}>
-         {this.state.groupList[0].record.map((data,index) => (
-            <Card
-              style={localStyles.CardStyle}
-              key={index}
-            >
-              <View style={localStyles.CardContent}>
-                  <View style={localStyles.genderAndNameContainer}>
-                    {data.gender == 0?<Ionicons name="woman-sharp" size={35} color="#FEC5E5" /> : <Ionicons name="man-sharp" size={35} color="#B1E6EE" /> }
-                    <Text style={localStyles.name}>{data.name}</Text>
-                  </View>
-                  <View style={localStyles.infoContainer}>
-                    <View style={localStyles.detailContainer}>
-
-                    </View>
-                    <View style={localStyles.detailContainer}>
-
-                    </View>
-                  </View>
+      <ScrollView style={localStyles.GroupListContainer} contentContainerStyle={{ alignItems: 'center' }}>
+        <Text style={localStyles.groupNoText}>群組人數：{this.state.groupList[0].record.length}/10</Text>
+        {this.state.groupList[0].record.map((data, index) => (
+          <Card
+            style={localStyles.CardStyle}
+            key={index}
+          >
+            <View style={localStyles.CardContent}>
+              <View style={localStyles.genderAndNameContainer}>
+                {data.gender == 0 ? <Ionicons name="woman-sharp" size={40} color="#FEC5E5" /> : <Ionicons name="man-sharp" size={40} color="#B1E6EE" />}
+                <Text style={localStyles.name}>{data.name}{data._id == this.state.formContent[0]._id ? "(你)" : null}</Text>
               </View>
+              <View style={localStyles.infoContainer}>
+                <View style={[localStyles.detailContainer]}>
+                  <View style={localStyles.titleTextContainer}>
+                    <Text style={{ fontSize: 16 }}>1.個人資料</Text>
+                  </View>
+                  <Text style={localStyles.PersonalInfoText}>年齡: {data.age}0-{data.age}9</Text>
+                  <Text style={localStyles.PersonalInfoText}>行山經驗: {data.experience == 1 ? "0-2年" : `${data.experience * 2 - 1}-${data.experience * 2}年`}</Text>
+                  {data.phoneNumber ? <Text style={localStyles.PersonalInfoText}>電話號碼：{data.phoneNumber}</Text> : null}
+                  <Text style={localStyles.PersonalInfoText}>電郵：{data.user.email}</Text>
+                </View>
+                <View style={localStyles.detailContainer}>
+                  <View style={localStyles.titleTextContainer}>
+                    <Text style={{ fontSize: 16 }}>2.路線資料</Text>
+                  </View>
+                  <Text style={localStyles.PersonalInfoText}>難度: {data.difficulty}星</Text>
+                  <Text style={localStyles.PersonalInfoText}>時間: {data.time == 1 ? "1-2" : `${data.time * 2 - 1}-${data.time * 2}`}小時</Text>
+                  <Text style={localStyles.PersonalInfoText}>景觀: {data.difficulty}星</Text>
+                </View>
+              </View>
+            </View>
 
-            </Card>
-         ))}
+          </Card>
+        ))}
+
+        <View style={[localStyles.buttonContainer]}>
+          <View style={[localStyles.addButton]}>
+            <MaterialIcons style={[localStyles.buttonIcon]} name="add-box" size={24} color="white" />
+            <Text style={[localStyles.textCenter, localStyles.addText]}>提供資訊</Text>
+          </View>
+        </View>
+
+
       </ScrollView>
     )
     return this.state.FormDataFetched && this.state.GroupDataFetched ? (
       this.state.showForm ?
         Form
         :
-        this.state.groupList.length > 0 ?
+        this.state.groupList[0].record.length > 0 ?
           showGroup
           :
           processing
@@ -400,7 +421,7 @@ const localStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white'
   },
-  GroupListContainer:{
+  GroupListContainer: {
     flex: 1,
   },
   BGContainer: {
@@ -496,34 +517,77 @@ const localStyles = StyleSheet.create({
   },
   CardStyle: {
     width: '90%',
-    height: 100,
+    height: 260,
     marginTop: 10,
     marginBottom: 10
   },
   CardContent: {
     flexDirection: 'row',
-    paddingTop: 15,
-    paddingLeft: 15
+    height: '100%',
+
   },
   genderAndNameContainer: {
     width: '25%',
-    marginRight: 10,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center'
   },
   name: {
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10
   },
   infoContainer: {
-    width: '70%'
+    marginLeft: 15
   },
   detailContainer: {
-    flex: 0.5,
     flexDirection: 'column',
-    backgroundColor: 'red'
-  }
+  },
+  titleTextContainer: {
+    borderBottomWidth: 1,
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+    marginTop: 10
+  },
+  PersonalInfoText: {
+    marginBottom: 5,
+    fontSize: 16
+  },
+  groupNoText: {
+    fontSize: 20,
+    marginTop: 10,
+    fontWeight: 'bold'
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    //paddingTop: 10,
+    paddingBottom: 15,
+    width: '100%',
+    flexDirection: 'row'
+  },
+  buttonIcon: {
+    marginRight: 10
+  },
+  addButton: {
+    width: '80%',
+    height: 53,
+    backgroundColor: 'rgba(45, 74, 105, 1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 27.5,
+    flexDirection: 'row'
+    //marginBottom: 15
+  },
+  addText: {
+    fontSize: 22,
+    color: 'rgba(255, 255, 255, 1)',
+    fontWeight: '900'
+  },
+  textCenter: {
+    textAlign: 'center',
+    justifyContent: 'center'
+  },
 
 
 })
