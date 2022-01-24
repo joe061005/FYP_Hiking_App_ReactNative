@@ -56,6 +56,7 @@ class Group extends React.Component {
     this.submitData = this.submitData.bind(this)
     this.message = this.message.bind(this)
     this.getGroup = this.getGroup.bind(this)
+    this.quitGroup = this.quitGroup.bind(this)
   }
 
   async componentDidMount() {
@@ -92,7 +93,20 @@ class Group extends React.Component {
   async quitGroup() {
     API.quitGroup().then(([code, data, header]) => {
       if (code == '200') {
-        this.setState({ showForm: true, formContent: [{ _id: '' }], groupList: [{ record: [] }] })
+        this.setState({
+          showForm: true,
+          formContent: [{ _id: '' }],
+          groupList: [{ record: [] }],
+          gender: 'boy',
+          age: '',
+          experience: '',
+          difficulty: 1,
+          time: 1,
+          view: 1,
+          startTime: 'morning',
+          phoneNumber: '',
+          name: '',
+        })
       }
     })
   }
@@ -380,7 +394,7 @@ class Group extends React.Component {
                   </View>
                   <Text style={localStyles.PersonalInfoText}>難度: {data.difficulty}星</Text>
                   <Text style={localStyles.PersonalInfoText}>時間: {data.time == 1 ? "1-2" : `${data.time * 2 - 1}-${data.time * 2}`}小時</Text>
-                  <Text style={localStyles.PersonalInfoText}>景觀: {data.difficulty}星</Text>
+                  <Text style={localStyles.PersonalInfoText}>景觀: {data.view}星</Text>
                 </View>
               </View>
             </View>
@@ -388,14 +402,14 @@ class Group extends React.Component {
           </Card>
         ))}
 
-        <View style={[localStyles.buttonContainer]}>
-          <View style={[localStyles.addButton]}>
-            <MaterialIcons style={[localStyles.buttonIcon]} name="add-box" size={24} color="white" />
-            <Text style={[localStyles.textCenter, localStyles.addText]}>提供資訊</Text>
+        <TouchableOpacity onPress={() => { Alert.alert('提示', '你確定要退出此群組嗎?', [{ text: '確定', onPress: () => { this.quitGroup() } }, { text: '取消' }]) }} style={{ marginTop: 10 }}>
+          <View style={[localStyles.quitGroupButtonContainer]}>
+            <View style={[localStyles.quitGroupButton]}>
+              <Ionicons style={[localStyles.buttonIcon]} name="exit-outline" size={24} color="white" />
+              <Text style={[localStyles.textCenter, localStyles.addText]}>退出群組</Text>
+            </View>
           </View>
-        </View>
-
-
+        </TouchableOpacity>
       </ScrollView>
     )
     return this.state.FormDataFetched && this.state.GroupDataFetched ? (
@@ -557,37 +571,23 @@ const localStyles = StyleSheet.create({
     marginTop: 10,
     fontWeight: 'bold'
   },
-  buttonContainer: {
+  quitGroupButtonContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
     //paddingTop: 10,
     paddingBottom: 15,
     width: '100%',
     flexDirection: 'row'
   },
-  buttonIcon: {
-    marginRight: 10
-  },
-  addButton: {
+  quitGroupButton: {
     width: '80%',
     height: 53,
-    backgroundColor: 'rgba(45, 74, 105, 1)',
+    backgroundColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 27.5,
-    flexDirection: 'row'
+    flexDirection: 'row',
     //marginBottom: 15
-  },
-  addText: {
-    fontSize: 22,
-    color: 'rgba(255, 255, 255, 1)',
-    fontWeight: '900'
-  },
-  textCenter: {
-    textAlign: 'center',
-    justifyContent: 'center'
-  },
+  }
 
 
 })
