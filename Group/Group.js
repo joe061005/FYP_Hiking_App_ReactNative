@@ -531,7 +531,7 @@ const localStyles = StyleSheet.create({
   },
   CardStyle: {
     width: '90%',
-    height: 260,
+    height: 270,
     marginTop: 10,
     marginBottom: 10
   },

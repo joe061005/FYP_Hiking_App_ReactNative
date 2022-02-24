@@ -19,7 +19,7 @@ import {
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo"
 import API from "../Api/api"
-import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons, Foundation } from "@expo/vector-icons"
+import { MaterialIcons, Entypo, AntDesign, MaterialCommunityIcons, Ionicons, Foundation, FontAwesome, EvilIcons } from "@expo/vector-icons"
 import * as Progress from 'react-native-progress'
 import DropDown from "react-native-dropdown-picker";
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -38,6 +38,8 @@ class RecordList extends React.Component {
       second: 0,
       minute: 0,
       hour: 0,
+      showTime: Platform.OS == 'ios' ? true : false,
+      showDate: Platform.OS == 'ios' ? true : false,
       isStop: false,
       isStart: false,
       userLocation: [],
@@ -58,6 +60,7 @@ class RecordList extends React.Component {
       spinner: false,
       clear: false,
       clearSend: true,
+      nearByHikers: []
 
     }
     this.startTimer = this.startTimer.bind(this)
@@ -205,35 +208,40 @@ class RecordList extends React.Component {
     var datetime = new Date(this.state.endDate.getFullYear(), this.state.endDate.getMonth(), this.state.endDate.getDate(),
       this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
 
-    const Send = setInterval(() => {
-      if (!this.state.startSending) {
-        clearInterval(Send)
-        return;
+    let Send = setInterval(() => {
+      if (Send) {
+        console.log("need to send email!")
+        this.setState({ sendEmail: true })
       }
-      this.setState({ sendEmail: true })
     }, 600000)
 
-    const check = setInterval(() => {
+    let check = setInterval(() => {
       if (!this.state.startSending) {
+        clearInterval(Send)
         clearInterval(check)
+        Send = false
+        check = false
         this.setState({ clearSend: true })
+        console.log("stop 1 second: ", check)
+        console.log("stop 10 min: ", Send)
         return;
       }
-      NetInfo.fetch().then(state => {
-        if (this.state.sendEmail && state.isConnected) {
-          console.log("send email!")
-          this.sendUserLocation()
-          this.setState({ sendEmail: false })
-        }
+      if (check) {
+        NetInfo.fetch().then((state) => {
+          if (this.state.sendEmail && state.isConnected) {
+            console.log("send email!")
+            this.sendUserLocation()
+            this.setState({ sendEmail: false })
+          }
 
-        if (new Date().getTime() > datetime.getTime() && state.isConnected) {
-          this.sendUserLocation(true)
-          this.setState({ startSending: false })
-          this.Message('由於己完成遠足旅程，安全出遊模式將會停止')
-        }
-      });
-
-
+          if (new Date().getTime() > datetime.getTime() && state.isConnected) {
+            console.log("finish!")
+            this.setState({ startSending: false, sendEmail: false })
+            this.sendUserLocation(true)
+            this.Message('由於己完成遠足旅程，安全出遊模式將會停止')
+          }
+        });
+      }
 
     }, 1000)
 
@@ -263,7 +271,7 @@ class RecordList extends React.Component {
       this.state.endTime.getHours(), this.state.endTime.getMinutes(), this.state.endTime.getSeconds())
 
 
-    ContactList.map(async (data, index) => {
+    const sendEmail = ContactList.map(async (data, index) => {
 
       const props =
       {
@@ -283,6 +291,33 @@ class RecordList extends React.Component {
 
     })
 
+   // Promise.all([sendEmail])
+
+    if (finish == true) {
+      await API.deleteUserLocation().then(([code, data, header]) => {
+        if (code == '200') {
+          console.log("deleted")
+        }
+      })
+
+
+    } else {
+      const locationProps = {
+        location: { latitude: location.coords.latitude, longitude: location.coords.longitude },
+        time: new Date()
+      }
+
+      const saveLocation = await API.saveUserLocation(locationProps).then(([code, data, header]) => {
+        if (code == '200') {
+          this.setState({ nearByHikers: data })
+          console.log("nearByHikers", this.state.nearByHikers)
+          //  console.log("time: ", new Date(this.state.nearByHikers[0].date))
+        }
+      })
+
+      Promise.all([sendEmail, saveLocation])
+    }
+
   }
 
   async getuserInfo() {
@@ -293,6 +328,12 @@ class RecordList extends React.Component {
 
   async stop() {
     this.setState({ startSending: false })
+    this.setState({ sendEmail: false })
+    await API.deleteUserLocation().then(([code, data, header]) => {
+      if (code == '200') {
+        console.log("deleted")
+      }
+    })
     this.Message('己停止安全出遊模式')
   }
 
@@ -362,8 +403,8 @@ class RecordList extends React.Component {
             region={{
               latitude: this.state.userLocation.length > 0 ? this.state.userLocation[this.state.userLocation.length - 1].latitude : 22.29258,
               longitude: this.state.userLocation.length > 0 ? this.state.userLocation[this.state.userLocation.length - 1].longitude : 114.18247,
-              latitudeDelta: this.state.userLocation.length > 0 ? 0.0025 : 0.2222,
-              longitudeDelta: this.state.userLocation.length > 0 ? 0.0025 : 0.2221
+              latitudeDelta: this.state.userLocation.length > 0 ? 0.0035 : 0.2222,
+              longitudeDelta: this.state.userLocation.length > 0 ? 0.0035 : 0.2221
 
             }}
             showsUserLocation={true}
@@ -373,6 +414,19 @@ class RecordList extends React.Component {
               strokeColor="#000"
               strokeWidth={2}
             />
+            {this.state.nearByHikers.length > 0 &&
+              this.state.nearByHikers.map((data, index) => (
+                <Marker
+                  key={index}
+                  coordinate={data.coordinate}
+                  title={`組員在${parseInt(Math.abs(new Date().getTime() - new Date(data.date).getTime()) / (1000 * 60) % 60)}分鐘 ${parseInt(Math.abs(new Date().getTime() - new Date(data.date).getTime()) / (1000) % 60)}秒前的位置`}
+                >
+                  {parseInt(Math.abs(new Date().getTime() - new Date(data.date).getTime()) / (1000 * 60) % 60) >= 30 ?
+                    <FontAwesome name="warning" size={40} color="red" /> :
+                    <Entypo name="location-pin" size={40} color="black" />
+                  }
+                </Marker>
+              ))}
           </MapView>
           :
           null
@@ -452,8 +506,8 @@ class RecordList extends React.Component {
                   </View>
                   <View>
                     {!this.state.startSending ?
-                      < TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { if (this.state.clearSend) { this.start(); this.setState({ clearSend: false }) } }}>
-                        <Text style={{ fontSize: 18, marginLeft: 5 }}>啓用</Text>
+                      < TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log("clicked", this.state.clearSend); if (this.state.clearSend) { this.start(); this.setState({ clearSend: false })  } }}>
+                        <Text style={{ fontSize: 18, marginLeft: 5, color: 'black' }}>啓用</Text>
                       </TouchableOpacity>
                       :
                       <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { this.stop() }}>
@@ -473,13 +527,18 @@ class RecordList extends React.Component {
                   <Text style={localStyles.titleTextStyle}>預計結束日期</Text>
                 </View>
                 <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
-                  <DateTimerPicker
-                    value={this.state.endDate}
-                    mode="date"
-                    display="calendar"
-                    onChange={(event, endDate) => { this.setState({ endDate }) }}
-                    style={{ height: 50 }}
-                  />
+                  {this.state.showDate ?
+                    <DateTimerPicker
+                      value={this.state.endDate}
+                      mode="date"
+                      display="calendar"
+                      onChange={(event, endDate) => { Platform.OS == 'android' && this.setState({ showDate: false }); endDate && this.setState({ endDate }) }}
+                      style={{ height: 50 }}
+                    /> :
+                    <TouchableOpacity style={[localStyles.pickerButton]} onPress={() => { this.setState({ showDate: true }) }}>
+                      <Text style={[localStyles.addUserButtonText, { marginLeft: 0 }]}>{this.state.endDate.toDateString()}</Text>
+                    </TouchableOpacity>
+                  }
                 </View>
 
                 <View style={{ flexDirection: 'row' }}>
@@ -487,13 +546,17 @@ class RecordList extends React.Component {
                   <Text style={localStyles.titleTextStyle}>預計結束時間</Text>
                 </View>
                 <View pointerEvents={this.state.startSending ? 'none' : 'auto'} style={{ width: 100 }}>
-                  <DateTimerPicker
-                    value={this.state.endTime}
-                    mode="time"
-                    display="clock"
-                    onChange={(event, endTime) => { this.setState({ endTime }) }}
-                    style={{ height: 50 }}
-                  />
+                  {this.state.showTime ?
+                    <DateTimerPicker
+                      value={this.state.endTime}
+                      mode="time"
+                      display="clock"
+                      onChange={(event, endTime) => { Platform.OS == 'android' && this.setState({ showTime: false }); endTime && this.setState({ endTime }) }}
+                      style={{ height: 50 }}
+                    /> :
+                    <TouchableOpacity style={[localStyles.pickerButton]} onPress={() => { this.setState({ showTime: true }) }}>
+                      <Text style={[localStyles.addUserButtonText, { marginLeft: 0 }]}>{this.state.endTime.toTimeString()}</Text>
+                    </TouchableOpacity>}
                 </View>
 
                 <View style={{ flexDirection: 'row' }}>
@@ -751,7 +814,7 @@ const localStyles = StyleSheet.create({
   },
   filterContainer: {
     marginRight: 20,
-    marginTop: 60,
+    marginTop: Platform.OS == 'ios' ? 60 : 20,
     marginLeft: 20,
   },
   TitleBarContainer: {
@@ -865,6 +928,16 @@ const localStyles = StyleSheet.create({
   iconStyle: {
     marginTop: 20,
     marginRight: 2
+  },
+  pickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 250,
+    height: 40,
+    backgroundColor: '#009dff',
+    borderRadius: 5,
+    marginTop: 10
   }
 
 
