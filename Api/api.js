@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 
 const api_path = {
-    baseURL: 'https://4475-223-19-143-35.ngrok.io/'
+    baseURL: 'https://bf0b-223-19-143-35.ngrok.io/'
 }
 
 let date = moment().format('YYYY-MM-DD');
@@ -129,6 +129,15 @@ var api = {
             method: `trail/getTrailByTitle/${title}`,
         }
         return get(request)
+    },
+
+    getRelatedTrail: (trail) => {
+        var request = {
+            method: `trail/getRelatedTrail/${trail}`,
+        }
+
+        return get(request)
+
     },
 
 
@@ -352,6 +361,14 @@ var api = {
         }
 
         return post(request)
+    },
+
+    getRealtedTrail: () =>{
+        var request = {
+            method: 'match/getRelatedTrails'
+        }
+
+        return get(request)
     },
 
     // setting page

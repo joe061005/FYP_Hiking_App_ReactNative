@@ -49,6 +49,7 @@ class Group extends React.Component {
       phoneNumber: '',
       name: '',
       groupList: [{ record: [] }],
+      relatedTrails: []
 
 
     }
@@ -57,10 +58,11 @@ class Group extends React.Component {
     this.message = this.message.bind(this)
     this.getGroup = this.getGroup.bind(this)
     this.quitGroup = this.quitGroup.bind(this)
+    this.getRelatedTrail = this.getRelatedTrail.bind(this)
   }
 
   async componentDidMount() {
-    await Promise.all([this.getForm(), this.getGroup()])
+    await Promise.all([this.getForm(), this.getGroup(), this.getRelatedTrail()])
 
   }
 
@@ -107,6 +109,15 @@ class Group extends React.Component {
           phoneNumber: '',
           name: '',
         })
+      }
+    })
+  }
+
+  async getRelatedTrail() {
+    API.getRealtedTrail().then(([code, data, header]) => {
+      if (code == '200') {
+        this.setState({ relatedTrails: data })
+        console.log("related: ", this.state.relatedTrails)
       }
     })
   }
@@ -365,8 +376,48 @@ class Group extends React.Component {
       </View>
     )
 
+    const hikingTrailData = this.state.relatedTrails.map((data, index1) =>
+      <TouchableOpacity key={index1} onPress={() => this.props.navigation.push("DetailByDistrict", { title: data.title, id: data._id })}>
+        <View style={localStyles.trailContainer}>
+          <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache: 'force-cache' }} />
+          <View style={localStyles.TextContainer}>
+            <Text style={[localStyles.TrailText, { fontWeight: "bold" }]}>{data.title}</Text>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={localStyles.TrailText}>難度：</Text>
+              {data.star.map((star, index2) => (
+                star == 1 ?
+                  <FontAwesome key={index2} name="star" size={20} color="#f2e82c" />
+                  :
+                  <FontAwesome key={index2} name="star-o" size={20} />
+              ))
+              }
+            </View>
+            <Text style={localStyles.TrailText}>長度：{data.distance}公里 </Text>
+            {data.time.split(".")[0] == '0' ?
+              <Text style={localStyles.TrailText}>時間： {data.time.split(".")[1]}分鐘</Text>
+              :
+              data.time.split(".")[1] == '0' ?
+                <Text style={localStyles.TrailText}>時間： {data.time.split(".")[0]}小時</Text>
+                :
+                <Text style={localStyles.TrailText}>時間: {data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
+            }
+            <Text style={localStyles.TrailText}>地區：{data.district} ({data.place}) </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    )
+
     const showGroup = (
       <ScrollView style={localStyles.GroupListContainer} contentContainerStyle={{ alignItems: 'center' }}>
+        <TouchableOpacity onPress={() => { Alert.alert('提示', '你確定要退出此群組嗎?', [{ text: '確定', onPress: () => { this.quitGroup() } }, { text: '取消' }]) }} style={{ marginTop: 10 }}>
+          <View style={[localStyles.quitGroupButtonContainer]}>
+            <View style={[localStyles.quitGroupButton]}>
+              <Ionicons style={[localStyles.buttonIcon]} name="exit-outline" size={24} color="white" />
+              <Text style={[localStyles.textCenter, localStyles.addText]}>退出群組</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         <Text style={localStyles.groupNoText}>群組人數：{this.state.groupList[0].record.length}/10</Text>
         {this.state.groupList[0].record.map((data, index) => (
           <Card
@@ -402,16 +453,17 @@ class Group extends React.Component {
           </Card>
         ))}
 
-        <TouchableOpacity onPress={() => { Alert.alert('提示', '你確定要退出此群組嗎?', [{ text: '確定', onPress: () => { this.quitGroup() } }, { text: '取消' }]) }} style={{ marginTop: 10 }}>
-          <View style={[localStyles.quitGroupButtonContainer]}>
-            <View style={[localStyles.quitGroupButton]}>
-              <Ionicons style={[localStyles.buttonIcon]} name="exit-outline" size={24} color="white" />
-              <Text style={[localStyles.textCenter, localStyles.addText]}>退出群組</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+        <View style={{ marginTop: 20, marginLeft: 10 }}>
+          <Text style={localStyles.TitleText}>推介路線</Text>
+          <ScrollView style={localStyles.trailItemContainer} horizontal>
+            {hikingTrailData}
+          </ScrollView>
+        </View>
+
       </ScrollView>
     )
+
+
     return this.state.FormDataFetched && this.state.GroupDataFetched ? (
       this.state.showForm ?
         Form
@@ -587,7 +639,44 @@ const localStyles = StyleSheet.create({
     borderRadius: 27.5,
     flexDirection: 'row',
     //marginBottom: 15
-  }
+  },
+  trailContainer: {
+
+    height: 410,
+    width: 300,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginRight: 20,
+    backgroundColor: '#edf6fb',
+
+  },
+  bgImage: {
+    width: 300,
+    height: 200,
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  TextContainer: {
+    marginTop: 20,
+    marginLeft: 10,
+  },
+  TrailText: {
+    color: "black",
+    fontSize: 20,
+    marginBottom: 10
+  },
+  trailItemContainer: {
+    marginLeft: 10,
+    marginRight: 20,
+    marginBottom: 20,
+    paddingBottom: 20
+  },
+  TitleText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    marginLeft: 10
+  },
 
 
 })

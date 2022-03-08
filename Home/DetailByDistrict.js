@@ -26,7 +26,7 @@ import {
     StackedBarChart
 } from "react-native-chart-kit";
 import { SliderBox } from "react-native-image-slider-box"
-import { Ionicons, MaterialIcons, FontAwesome , AntDesign, Entypo} from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome, AntDesign, Entypo } from '@expo/vector-icons';
 import { Table, TableWrapper, Row, Rows, Col } from 'react-native-table-component-2';
 import * as Progress from 'react-native-progress'
 import API from "../Api/api"
@@ -41,10 +41,12 @@ class DetailByDistrict extends React.Component {
             data: { time: '', star: [], path: [{ latitude: 0, longitude: 0 }], xlabel: [], marker: [], trafficStart: [], trafficEnd: [] },
             dataFetched: false,
             Info: [],
+            relatedTrails: []
         }
         this.handleBackButton = this.handleBackButton.bind(this)
         this.getInfo = this.getInfo.bind(this)
         this.getInfoByTrail = this.getInfoByTrail.bind(this)
+        this.getRelatedTrail = this.getRelatedTrail.bind(this)
     }
 
     async componentDidMount() {
@@ -61,7 +63,7 @@ class DetailByDistrict extends React.Component {
                 null
         });
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        await Promise.all([this.getInfo(), this.getInfoByTrail()])
+        await Promise.all([this.getInfo(), this.getInfoByTrail(), this.getRelatedTrail()])
 
 
     }
@@ -110,12 +112,52 @@ class DetailByDistrict extends React.Component {
         })
     }
 
+    async getRelatedTrail() {
+        API.getRelatedTrail(this.props.route.params.title).then(([code, data, header]) => {
+            if (code == '200') {
+                console.log("relatedTrails: ", data)
+                this.setState({ relatedTrails: data })
+            }
+        })
+    }
+
 
 
 
     render() {
 
         //console.log("ID: ", this.props.route.params.id)
+
+        const hikingTrailData = this.state.relatedTrails.map((data, index1) =>
+            <TouchableOpacity key={index1} onPress={() => this.props.navigation.push("DetailByDistrict", { title: data.title, id: data._id })}>
+                <View style={localStyles.trailContainer}>
+                    <Image style={localStyles.bgImage} source={{ uri: data.image[0], cache: 'force-cache' }} />
+                    <View style={localStyles.TextContainer}>
+                        <Text style={[localStyles.TrailText, { fontWeight: "bold" }]}>{data.title}</Text>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text style={localStyles.TrailText}>難度：</Text>
+                            {data.star.map((star, index2) => (
+                                star == 1 ?
+                                    <FontAwesome key={index2} name="star" size={20} color="#f2e82c" />
+                                    :
+                                    <FontAwesome key={index2} name="star-o" size={20} />
+                            ))
+                            }
+                        </View>
+                        <Text style={localStyles.TrailText}>長度：{data.distance}公里 </Text>
+                        {data.time.split(".")[0] == '0' ?
+                            <Text style={localStyles.TrailText}>時間： {data.time.split(".")[1]}分鐘</Text>
+                            :
+                            data.time.split(".")[1] == '0' ?
+                                <Text style={localStyles.TrailText}>時間： {data.time.split(".")[0]}小時</Text>
+                                :
+                                <Text style={localStyles.TrailText}>時間: {data.time.split(".")[0]}小時 {data.time.split(".")[1]}分鐘</Text>
+                        }
+                        <Text style={localStyles.TrailText}>地區：{data.district} ({data.place}) </Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        )
 
         const hiking_trail = (
             <View>
@@ -134,7 +176,7 @@ class DetailByDistrict extends React.Component {
                             <Text style={localStyles.TitleText}>路線資料</Text>
                         </View>
                         <View>
-                            <TouchableOpacity onPress={() => { this.props.navigation.navigate("Info", {trail: this.props.route.params.title, data: this.state.Info})}}>
+                            <TouchableOpacity onPress={() => { this.props.navigation.navigate("Info", { trail: this.props.route.params.title, data: this.state.Info }) }}>
                                 <View style={[localStyles.buttonContainer]}>
                                     <View style={[localStyles.addButton, { width: '100%', backgroundColor: '#009dff' }]}>
                                         <Entypo style={[localStyles.buttonIcon]} name="info-with-circle" size={24} color="white" />
@@ -286,6 +328,13 @@ class DetailByDistrict extends React.Component {
                     <Text style={localStyles.RefText}>資料由FolloMe隨我行提供</Text>
                 </View>
 
+                <View style={[localStyles.descContainer, {marginTop: 80}]}>
+                    <Text style={localStyles.TitleText}>更多路線</Text>
+                    <ScrollView style={localStyles.trailItemContainer} horizontal>
+                        {hikingTrailData}
+                    </ScrollView>
+                </View>
+
 
 
 
@@ -402,11 +451,11 @@ const localStyles = StyleSheet.create({
         width: '60%',
         flexDirection: 'row',
         marginTop: -2
-      },
-      buttonIcon: {
+    },
+    buttonIcon: {
         marginRight: 10
-      },
-      addButton: {
+    },
+    addButton: {
         width: '80%',
         height: 30,
         backgroundColor: 'rgba(45, 74, 105, 1)',
@@ -415,16 +464,47 @@ const localStyles = StyleSheet.create({
         borderRadius: 27.5,
         flexDirection: 'row'
         //marginBottom: 15
-      },
-      addText: {
+    },
+    addText: {
         fontSize: 20,
         color: 'rgba(255, 255, 255, 1)',
         fontWeight: '900'
-      },
-      textCenter: {
+    },
+    textCenter: {
         textAlign: 'center',
         justifyContent: 'center'
-      },
+    },
+    trailContainer: {
+
+        height: 410,
+        width: 300,
+        borderWidth: 1,
+        borderRadius: 5,
+        marginRight: 20,
+        backgroundColor: '#edf6fb',
+
+    },
+    bgImage: {
+        width: 300,
+        height: 200,
+        borderWidth: 1,
+        borderRadius: 5,
+    },
+    TextContainer: {
+        marginTop: 20,
+        marginLeft: 10,
+    },
+    TrailText: {
+        color: "black",
+        fontSize: 20,
+        marginBottom: 10
+    },
+    trailItemContainer: {
+        marginLeft: 10,
+        marginRight: 20,
+        marginBottom: 20,
+        paddingBottom: 20
+    },
 
 
 })

@@ -292,6 +292,41 @@ const GroupNavigator = ({ navigation, route }) => {
                 }}
             />
 
+            <HomeStack.Screen
+                name="DetailByDistrict"
+                component={DetailByDistrictComponent}
+                options={({ route }) => ({
+                    title: route.params.title,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                })}
+
+            />
+
+            <HomeStack.Screen
+                name="Info"
+                component={InfoByTrailComponent}
+                options={({ route }) => ({
+                    title: `${route.params.trail}資訊`,
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                })}
+            />
+
+            <InfoStack.Screen
+                name="InfoDetail"
+                component={InfoDetailComponent}
+                options={{
+                    title: "資訊詳情",
+                    headerStyle: {
+                        backgroundColor: "#E0FFF6"
+                    }
+                }}
+
+            />
+
 
 
         </GroupStack.Navigator>
