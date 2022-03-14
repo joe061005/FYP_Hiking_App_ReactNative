@@ -370,7 +370,7 @@ class Group extends React.Component {
       <View style={[localStyles.Container, { alignItems: 'center', justifyContent: 'center' }]}>
         <FontAwesome5 name="exclamation-triangle" size={50} color="#f6e146" />
         <Text style={{ fontSize: 25, fontWeight: 'bold', marginTop: 20 }}>正在進行配對，請耐心等候！</Text>
-        <TouchableOpacity style={{ marginTop: 30 }} onPress={() => { this.getGroup() }}>
+        <TouchableOpacity style={{ marginTop: 30 }} onPress={() => { this.getGroup(), this.getRelatedTrail() }}>
           <Ionicons name="reload" size={35} color="black" />
         </TouchableOpacity>
       </View>
