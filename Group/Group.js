@@ -434,7 +434,6 @@ class Group extends React.Component {
                   <View style={localStyles.titleTextContainer}>
                     <Text style={{ fontSize: 16 }}>1.個人資料</Text>
                   </View>
-                  <Text style={localStyles.PersonalInfoText}>年齡: {data.age}0-{data.age}9</Text>
                   <Text style={localStyles.PersonalInfoText}>行山經驗: {data.experience == 1 ? "0-2年" : `${data.experience * 2 - 1}-${data.experience * 2}年`}</Text>
                   {data.phoneNumber ? <Text style={localStyles.PersonalInfoText}>電話號碼：{data.phoneNumber}</Text> : null}
                   <Text style={localStyles.PersonalInfoText}>電郵：{data.user.email}</Text>
@@ -583,7 +582,7 @@ const localStyles = StyleSheet.create({
   },
   CardStyle: {
     width: '90%',
-    height: 270,
+    height: 250,
     marginTop: 10,
     marginBottom: 10
   },
