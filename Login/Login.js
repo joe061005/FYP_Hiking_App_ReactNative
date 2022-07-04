@@ -765,7 +765,7 @@ class Login extends React.Component {
         >
 
           <ImageBackground
-            source={require("../assets/loginbg.jpeg")}
+            source={require("../assets/loginbg.jpg")}
             resizeMode="cover"
             style={localStyles.backgroundImage}
           >
