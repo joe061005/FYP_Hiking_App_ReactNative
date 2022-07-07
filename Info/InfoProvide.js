@@ -25,6 +25,7 @@ import { Button } from "react-native-paper"
 import * as ImagePicker from "expo-image-picker"
 import Spinner from 'react-native-loading-spinner-overlay'
 import MapView, { Marker, Polyline } from "react-native-maps";
+import * as FileSystem from 'expo-file-system'
 
 
 
@@ -202,6 +203,9 @@ class InfoProvide extends React.Component {
       });
 
       if (data.cancelled === false) {
+        const result = await FileSystem.getInfoAsync(data.uri)
+        if(result.size > 9000000) return Alert.alert("照片檔案太大，請選擇另一張照片!")
+        console.log("Img size: ", result.size )
         let newfile = {
           uri: data.uri,
           type: `test/${data.uri.split(".")[1]}`,
@@ -260,6 +264,9 @@ class InfoProvide extends React.Component {
       .catch((err) => {
         Alert.alert("sothing went wrong");
       });
+
+    console.log("result", result)
+
     return result;
   }
 
@@ -444,7 +451,7 @@ class InfoProvide extends React.Component {
                   latitudeDelta: 0.0022,
                   longitudeDelta: 0.0021
                 }}
-                style={{ height: 300 , marginLeft:20, marginTop: 10}}
+                style={{ height: 300, marginLeft: 20, marginTop: 10 }}
                 showsUserLocation={true}
               >
                 <Marker
