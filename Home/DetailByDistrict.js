@@ -234,7 +234,7 @@ class DetailByDistrict extends React.Component {
                             <Marker
                                 key={index}
                                 coordinate={marker.latlong}
-                                title={marker.title}
+                                title={index == 0? `起點: ${marker.title}` : index == this.state.data.marker.length -1? `終點: ${marker.title}` : marker.title}
                             />
                         ))}
                         <Polyline
