@@ -148,7 +148,7 @@ class Detail extends React.Component {
               <Marker
                 key={index}
                 coordinate={marker.latlong}
-                title={index == 0? `起點: ${marker.title}` : index == data.marker.length -1? `終點: ${marker.title}` : marker.title}
+                title={index == 0? `起點${marker.title? `: ${marker.title}` : ""}` : index == data.marker.length -1? `終點${marker.title? `: ${marker.title}`: ""}` : marker.title}
               />
             ))}
             <Polyline
