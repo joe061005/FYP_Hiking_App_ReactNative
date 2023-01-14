@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "fyp",
-    "slug": "fyp",
+    "name": "hiking-app",
+    "slug": "hiking-app",
+    "description": "This app is for hikers to explore different hiking trails in Hong Kong and form hiking groups easily",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
