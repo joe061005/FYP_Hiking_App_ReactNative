@@ -20,7 +20,6 @@ import API from "../Api/api"
 import { MaterialIcons, Entypo, AntDesign, FontAwesome } from "@expo/vector-icons"
 import { StackActions } from '@react-navigation/native'
 import Spinner from "react-native-loading-spinner-overlay";
-import UserIcon from '../assets/user_icon.svg'
 
 
 class Setting extends React.Component {
