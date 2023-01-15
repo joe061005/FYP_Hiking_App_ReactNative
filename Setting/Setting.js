@@ -20,6 +20,7 @@ import API from "../Api/api"
 import { MaterialIcons, Entypo, AntDesign, FontAwesome } from "@expo/vector-icons"
 import { StackActions } from '@react-navigation/native'
 import Spinner from "react-native-loading-spinner-overlay";
+import UserIcon from '../assets/user_icon.svg'
 
 
 class Setting extends React.Component {
@@ -77,7 +78,7 @@ class Setting extends React.Component {
           
         />
         <Image
-          source={{ uri: 'https://usergenerator.canekzapata.net/2e4566fd829bcf9eb11ccdb5f252b02f.jpeg', cache:'force-cache'  }}
+          source={require("../assets/user_icon.png")}
           style={localStyles.userImage}
         />
 
@@ -113,15 +114,15 @@ const localStyles = StyleSheet.create({
     backgroundColor: 'rgb(255,255,255)'
   },
   backgroundImage: {
-    height: 300,
+    height: 250,
     width: Dimensions.get('window').width,
-    marginBottom: 50
   },
   userImage: {
     width: 150,
     height: 150,
     alignSelf: 'center',
-    // position: 'absolute',
+    position: 'relative',
+    top: -130
     // borderRadius: 90,
     // top: 140,
     // left: '30%'
@@ -129,7 +130,7 @@ const localStyles = StyleSheet.create({
   userInfoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: -110
   },
   userNameText: {
     fontSize: 22,
