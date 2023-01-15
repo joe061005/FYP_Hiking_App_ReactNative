@@ -72,7 +72,7 @@ class Setting extends React.Component {
           textStyle={{ color: 'white' }}
         />
         <Image
-          source={{ uri: "https://cdn.lifestyleasia.com/wp-content/uploads/sites/2/2020/11/07194353/hong-kong-hikes-kiler-views-hero-1600x900.jpg", cache:'force-cache' }}
+          source={require("../assets/settingBG.jpg")}
           style={localStyles.backgroundImage}
           
         />
@@ -113,16 +113,18 @@ const localStyles = StyleSheet.create({
     backgroundColor: 'rgb(255,255,255)'
   },
   backgroundImage: {
-    height: 250,
-    width: Dimensions.get('window').width
+    height: 300,
+    width: Dimensions.get('window').width,
+    marginBottom: 50
   },
   userImage: {
     width: 150,
     height: 150,
-    position: 'absolute',
-    borderRadius: 90,
-    top: 140,
-    left: '30%'
+    alignSelf: 'center',
+    // position: 'absolute',
+    // borderRadius: 90,
+    // top: 140,
+    // left: '30%'
   },
   userInfoContainer: {
     justifyContent: 'center',
