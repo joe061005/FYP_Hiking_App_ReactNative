@@ -197,7 +197,7 @@ class Login extends React.Component {
         this.Message('此帳號己完成驗證')
       } else {
         this.setState({ resendEmail_username: "" })
-        Alert.alert('注意', '己發送驗證電郵',
+        Alert.alert('注意', '己發送驗證電郵，請查看電子郵箱或垃圾郵件',
           [{
             text: '確定',
             onPress: () => this.setState({ page: "login" })
@@ -230,7 +230,7 @@ class Login extends React.Component {
         this.Message('請先完成驗證')
       } else {
         //  this.setState({ forgetPassword_username: "" })
-        this.Message('己發出電郵')
+        this.Message('己發出電郵，請查看電子郵箱或垃圾郵件')
         this.setState({ page: "enterCode" })
       }
     })
@@ -316,7 +316,7 @@ class Login extends React.Component {
       } else if (code == '200') {
         this.setState({registerSpinner: !this.state.registerSpinner})
         setTimeout(() => {
-          this.Message('成功創立帳戶，請透過電郵啟用您的帳號')
+          this.Message('成功創立帳戶，請查看電子郵箱或垃圾郵件以啟用您的帳號')
         }, 200)  
         this.setState({register_username: ''})
         this.setState({register_password: ''})
