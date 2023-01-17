@@ -316,7 +316,7 @@ class Login extends React.Component {
       } else if (code == '200') {
         this.setState({registerSpinner: !this.state.registerSpinner})
         setTimeout(() => {
-          this.Message('成功創立帳戶，請查看電子郵箱或垃圾郵件來啟用您的帳號')
+          this.Message('成功創立帳戶，請查看電子郵箱或垃圾郵件以啟用您的帳號')
         }, 200)  
         this.setState({register_username: ''})
         this.setState({register_password: ''})
